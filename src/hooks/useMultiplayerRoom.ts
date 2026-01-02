@@ -94,6 +94,15 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     setError(null);
 
     try {
+      // Check if Supabase is configured
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      if (!supabaseUrl || !supabaseKey || supabaseUrl.includes("placeholder")) {
+        setError("Supabase n'est pas configuré. Vérifiez les variables d'environnement.");
+        return null;
+      }
+
       const roomCode = generateRoomCode();
       const countryIndices = shuffleArray(
         Array.from({ length: countries.length }, (_, i) => i)
@@ -128,6 +137,15 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     setError(null);
 
     try {
+      // Check if Supabase is configured
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      if (!supabaseUrl || !supabaseKey || supabaseUrl.includes("placeholder")) {
+        setError("Supabase n'est pas configuré. Vérifiez les variables d'environnement.");
+        return false;
+      }
+
       // Find the room
       const { data: existingRoom, error: findError } = await supabase
         .from("game_rooms")

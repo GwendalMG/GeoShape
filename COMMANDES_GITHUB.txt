@@ -1,0 +1,48 @@
+# 📦 Commandes pour créer et connecter le repository GitHub
+
+## ✅ Étape 1 : Créer le repository sur GitHub
+
+1. Allez sur https://github.com
+2. Cliquez sur le "+" en haut à droite → "New repository"
+3. Nom : `geo-guess-duel` (ou le nom que vous voulez)
+4. Description : "Jeu de devinette de pays en duel"
+5. Visibilité : Public ou Private
+6. ⚠️ NE COCHEZ PAS "Initialize with README"
+7. Cliquez sur "Create repository"
+
+## 🔗 Étape 2 : Connecter et pousser le code
+
+Une fois le repository créé, GitHub vous donnera des commandes. Exécutez-les dans votre terminal :
+
+```bash
+cd "/Users/gwendalmarie-gourves/Downloads/geo-guess-duel-main 2"
+
+# Remplacez VOTRE_USERNAME par votre nom d'utilisateur GitHub
+git remote add origin https://github.com/VOTRE_USERNAME/geo-guess-duel.git
+
+# Renommez la branche en main (si nécessaire)
+git branch -M main
+
+# Poussez le code
+git push -u origin main
+```
+
+**Exemple concret :**
+Si votre username GitHub est "gwendal" :
+```bash
+git remote add origin https://github.com/gwendal/geo-guess-duel.git
+git branch -M main
+git push -u origin main
+```
+
+## ✅ Vérification
+
+Allez sur votre repository GitHub, vous devriez voir tous vos fichiers !
+
+## 🚀 Ensuite : Déployer sur Vercel
+
+1. Allez sur https://vercel.com
+2. Importez votre repository GitHub
+3. Ajoutez les variables d'environnement Supabase
+4. Déployez !
+
