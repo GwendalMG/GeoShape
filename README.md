@@ -1,73 +1,100 @@
-# Welcome to your Lovable project
+# 🌍 Geo Guess Duel
 
-## Project info
+Un jeu de devinette de pays en duel ! Devinez les pays à partir de leur silhouette, découvrez leur capitale et apprenez des anecdotes fascinantes.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🎮 Fonctionnalités
 
-## How can I edit this code?
+- **Mode Local** : Jouez à deux sur le même écran
+- **Mode Multijoueur** : Affrontez un ami en ligne (1v1)
+- **30 secondes** par tour pour deviner
+- **Capitale et anecdotes** affichées avant la devinette (pédagogique !)
+- **Fuzzy matching** : Accepte les orthographes avec petites erreurs
+- **Jokers** : Obtenez un indice (première lettre)
+- **Design moderne** avec animations fluides
 
-There are several ways of editing your application.
+## 🚀 Installation
 
-**Use Lovable**
+```bash
+# Installer les dépendances
+npm install
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Lancer le serveur de développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Ouvrez [http://localhost:8080](http://localhost:8080) dans votre navigateur.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🎯 Comment jouer
 
-**Use GitHub Codespaces**
+1. Choisissez le mode (Local ou Multijoueur)
+2. Entrez les noms des joueurs
+3. Choisissez le nombre de rounds
+4. Devinez le pays à partir de sa silhouette !
+5. Chaque joueur a 30 secondes par tour
+6. Le joueur avec le plus de points gagne
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🌐 Mode Multijoueur
 
-## What technologies are used for this project?
+Le mode multijoueur nécessite une configuration Supabase. Voir `GUIDE_MULTIJOUEUR.md` pour les instructions détaillées.
 
-This project is built with:
+### Configuration rapide
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Créez un compte sur [supabase.com](https://supabase.com)
+2. Créez un projet
+3. Exécutez le SQL de migration (voir `supabase/migrations/`)
+4. Créez un fichier `.env` avec vos clés Supabase
+5. Redémarrez le serveur
 
-## How can I deploy this project?
+## 📦 Déploiement
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Sur Vercel (Recommandé)
 
-## Can I connect a custom domain to my Lovable project?
+1. Poussez votre code sur GitHub
+2. Importez le projet sur [vercel.com](https://vercel.com)
+3. Ajoutez les variables d'environnement Supabase
+4. Déployez !
 
-Yes, you can!
+Voir `DEPLOIEMENT_RAPIDE.md` pour plus de détails.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🛠️ Technologies
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **React** + **TypeScript**
+- **Vite** pour le build
+- **Tailwind CSS** pour le style
+- **Supabase** pour le multijoueur en temps réel
+- **shadcn/ui** pour les composants
+
+## 📝 Structure du projet
+
+```
+├── src/
+│   ├── components/     # Composants React
+│   ├── data/          # Données des pays
+│   ├── hooks/          # Hooks personnalisés
+│   ├── pages/          # Pages de l'application
+│   └── integrations/   # Intégrations (Supabase)
+├── supabase/
+│   └── migrations/     # Migrations SQL
+└── public/             # Assets statiques
+```
+
+## 🎨 Améliorations récentes
+
+- ✅ Timer augmenté à 30 secondes
+- ✅ Fuzzy matching pour accepter les erreurs d'orthographe
+- ✅ Affichage de la capitale et de l'anecdote avant la devinette
+- ✅ Design optimisé pour éviter le scroll
+- ✅ Animations améliorées et feedback visuel
+
+## 📄 Licence
+
+Ce projet est un projet personnel.
+
+## 🙏 Remerciements
+
+- Données des pays : `world-map-country-shapes`
+- Composants UI : `shadcn/ui`
+
+---
+
+**Amusez-vous bien ! 🎉**
