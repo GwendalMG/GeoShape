@@ -1,0 +1,13 @@
+Créez un fichier nommé .env à la racine du projet avec ce contenu :
+
+VITE_SUPABASE_URL=https://oxaooajtaigkvxeixdxs.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=votre-clé-publique-ici
+
+Pour obtenir la clé publique :
+1. Allez sur https://supabase.com/dashboard/project/oxaooajtaigkvxeixdxs
+2. Cliquez sur Settings (icône d'engrenage) → API
+3. Copiez la valeur de "anon public" key
+4. Remplacez "votre-clé-publique-ici" par cette clé
+
+Ensuite, redémarrez le serveur : npm run dev
+
