@@ -63,13 +63,22 @@ export function MultiplayerGame({
     if (room.status === "playing" && !room.round_answered) {
       // New round or turn switch, but round not finished yet
       setPhase("playing");
-      setFeedback(null);
+      // Clear feedback when it's NOT my turn (the other player's turn just started)
+      // This ensures I don't see feedback from the previous player
+      if (!isMyTurn) {
+        setFeedback(null);
+      }
       setRevealedCountryName("");
       setIsTimerRunning(isMyTurn); // Only start timer if it's my turn
       setHint(null);
     } else if (room.round_answered) {
       // Round is finished (either someone found it or both failed)
-      // Show the answer
+      // Clear feedback if it's NOT my turn (the other player found it)
+      // Only keep feedback if I was the one who just played (it's still my turn)
+      if (!isMyTurn) {
+        // The other player found it or both failed, clear my feedback
+        setFeedback(null);
+      }
       setPhase("revealed");
       setIsTimerRunning(false);
       if (currentCountry) {
@@ -81,7 +90,7 @@ export function MultiplayerGame({
       }, 3000);
       return () => clearTimeout(timeoutId);
     }
-  }, [room.current_round, room.round_answered, room.status, room.current_turn, currentCountry, isMyTurn, onNextRound]);
+  }, [room.current_round, room.round_answered, room.status, room.current_turn, currentCountry, isMyTurn, onNextRound, feedback]);
 
   const useJoker = useCallback(() => {
     if (!currentCountry || phase !== "playing" || jokersLeft <= 0 || !isMyTurn) return;
@@ -100,20 +109,14 @@ export function MultiplayerGame({
     setFeedback(result.correct ? "correct" : "incorrect");
     
     if (result.correct) {
-      // If correct, reveal the country and advance to next round
+      // If correct, reveal the country
+      // The round_answered will be set to true, triggering the useEffect
+      // which will handle showing "revealed" phase with my feedback
       setRevealedCountryName(result.countryName);
-      setPhase("revealed");
-      setTimeout(() => {
-        onNextRound();
-      }, 3000);
     } else {
-      // If wrong, just show feedback briefly, then let the other player try
-      // Don't reveal the country name yet - the other player can still try
-      // The room.round_answered will be updated by submitAnswer if both have tried
-      setTimeout(() => {
-        setFeedback(null);
-        setPhase("playing"); // Stay in playing phase for the other player
-      }, 2000);
+      // If wrong, show feedback briefly
+      // The turn will switch, triggering the useEffect to reset feedback for the other player
+      // The other player will see no feedback since they haven't played yet
     }
   }, [isMyTurn, phase, onSubmitAnswer, onNextRound]);
 
@@ -401,12 +404,15 @@ export function MultiplayerGame({
         {/* Revealed - just show the country name */}
         {phase === "revealed" && currentCountry && (
           <div className="text-center animate-fade-in space-y-3 md:space-y-4">
-            <p className={cn(
-              "text-lg md:text-xl font-bold",
-              feedback === "correct" ? "text-success" : "text-destructive"
-            )}>
-              {feedback === "correct" ? "✓ Bonne réponse !" : "✗ Mauvaise réponse..."}
-            </p>
+            {/* Only show feedback if I actually played (have feedback) */}
+            {feedback && (
+              <p className={cn(
+                "text-lg md:text-xl font-bold",
+                feedback === "correct" ? "text-success" : "text-destructive"
+              )}>
+                {feedback === "correct" ? "✓ Bonne réponse !" : "✗ Mauvaise réponse..."}
+              </p>
+            )}
             <p className="text-lg md:text-xl font-bold text-foreground">
               C'était : {revealedCountryName}
             </p>
