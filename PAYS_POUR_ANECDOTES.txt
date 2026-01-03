@@ -1,0 +1,166 @@
+LISTE DES 164 PAYS POUR PERSONNALISER LES ANECDOTES
+====================================================
+
+EUROPE (50 pays):
+-----------------
+1. France
+2. Italie
+3. Allemagne
+4. Espagne
+5. Royaume-Uni
+6. Portugal
+7. Grèce
+8. Suède
+9. Norvège
+10. Finlande
+11. Pologne
+12. Pays-Bas
+13. Belgique
+14. Suisse
+15. Autriche
+16. Irlande
+17. Danemark
+18. Tchéquie
+19. Hongrie
+20. Roumanie
+21. Bulgarie
+22. Croatie
+23. Serbie
+24. Slovaquie
+25. Ukraine
+26. Biélorussie
+27. Lituanie
+28. Lettonie
+29. Estonie
+30. Islande
+31. Albanie
+32. Macédoine du Nord
+33. Slovénie
+34. Bosnie-Herzégovine
+35. Monténégro
+36. Moldavie
+37. Géorgie
+38. Arménie
+39. Azerbaïdjan
+40. Russie
+
+ASIE (40 pays):
+---------------
+41. Japon
+42. Chine
+43. Inde
+44. Corée du Sud
+45. Thaïlande
+46. Vietnam
+47. Indonésie
+48. Philippines
+49. Malaisie
+50. Singapour
+51. Pakistan
+52. Bangladesh
+53. Iran
+54. Irak
+55. Arabie Saoudite
+56. Émirats Arabes Unis
+57. Turquie
+58. Israël
+59. Kazakhstan
+60. Ouzbékistan
+61. Afghanistan
+62. Népal
+63. Sri Lanka
+64. Myanmar
+65. Cambodge
+66. Laos
+67. Mongolie
+
+OCÉANIE (4 pays):
+-----------------
+68. Australie
+69. Nouvelle-Zélande
+70. Papouasie-Nouvelle-Guinée
+71. Fidji
+
+AMÉRIQUE DU NORD (13 pays):
+---------------------------
+72. États-Unis
+73. Canada
+74. Mexique
+75. Guatemala
+76. Honduras
+77. Nicaragua
+78. Costa Rica
+79. Panama
+80. Cuba
+81. Jamaïque
+82. Haïti
+83. République Dominicaine
+
+AMÉRIQUE DU SUD (12 pays):
+--------------------------
+84. Brésil
+85. Argentine
+86. Chili
+87. Colombie
+88. Pérou
+89. Venezuela
+90. Équateur
+91. Bolivie
+92. Paraguay
+93. Uruguay
+94. Guyana
+95. Suriname
+
+AFRIQUE (45 pays):
+------------------
+96. Égypte
+97. Afrique du Sud
+98. Maroc
+99. Algérie
+100. Tunisie
+101. Nigeria
+102. Kenya
+103. Éthiopie
+104. Ghana
+105. Tanzanie
+106. Ouganda
+107. Côte d'Ivoire
+108. Cameroun
+109. Sénégal
+110. Madagascar
+111. Angola
+112. Mozambique
+113. Zimbabwe
+114. Botswana
+115. Namibie
+116. Zambie
+117. Rwanda
+118. Mali
+119. Niger
+120. Tchad
+121. Somalie
+122. Libye
+123. Soudan
+124. Malawi
+125. République Démocratique du Congo
+126. République du Congo
+127. Gabon
+128. République Centrafricaine
+129. Burkina Faso
+130. Bénin
+131. Togo
+132. Mauritanie
+133. Guinée
+134. Sierra Leone
+135. Liberia
+136. Soudan du Sud
+137. Érythrée
+138. Djibouti
+
+TOTAL: 164 pays
+
+Pour modifier les anecdotes, ouvrez le fichier:
+src/data/countries.ts
+
+Et modifiez le champ "funFact" pour chaque pays dans l'objet countryNames.
+

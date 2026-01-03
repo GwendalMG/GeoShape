@@ -79,7 +79,17 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
       setTimeout(() => {
         setPhase("revealed");
         setTimeout(() => {
-          goToNextRound();
+          // Always switch to the other player, even when correct
+          if (currentPlayer === 1) {
+            setCurrentPlayer(2);
+            setIsTimerRunning(true);
+            setPhase("playing");
+            setFeedback(null);
+            setHint(null);
+          } else {
+            // Player 2 found it, go to next round with player 1
+            goToNextRound();
+          }
         }, 3000); // 3 seconds to see the answer
       }, 1000);
     } else {
