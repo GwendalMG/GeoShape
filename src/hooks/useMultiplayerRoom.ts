@@ -207,6 +207,9 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     setError(null);
 
     try {
+      // Update room to start the game
+      // Note: We don't set round_start_turn here to avoid issues if the column doesn't exist
+      // It will be set in nextRound when needed
       const { data, error: updateError } = await supabase
         .from("game_rooms")
         .update({
@@ -215,7 +218,6 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
           current_country_index: room.country_indices[0],
           current_turn: "host", // Always start with host
           round_answered: false,
-          round_start_turn: "host", // Track that host started round 1
         })
         .eq("id", room.id)
         .select()
@@ -328,15 +330,22 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       const currentRoundStartTurn = room.round_start_turn || "host";
       const nextTurn = currentRoundStartTurn === "host" ? "guest" : "host";
       
+      // Build update payload - only include round_start_turn if it exists
+      const updatePayload: any = {
+        current_round: nextRoundNum,
+        current_country_index: room.country_indices[nextRoundNum - 1],
+        current_turn: nextTurn, // Alternate starting player
+        round_answered: false,
+      };
+
+      // Only add round_start_turn if the field exists in the room (backwards compatibility)
+      if (room.round_start_turn !== undefined) {
+        updatePayload.round_start_turn = nextTurn;
+      }
+      
       await supabase
         .from("game_rooms")
-        .update({
-          current_round: nextRoundNum,
-          current_country_index: room.country_indices[nextRoundNum - 1],
-          current_turn: nextTurn, // Alternate starting player
-          round_start_turn: nextTurn, // Track who starts this round
-          round_answered: false,
-        })
+        .update(updatePayload)
         .eq("id", room.id);
     }
   }, [room]);
