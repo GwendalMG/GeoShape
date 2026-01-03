@@ -208,23 +208,50 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
 
     try {
       // Update room to start the game
-      // Note: We don't set round_start_turn here to avoid issues if the column doesn't exist
-      // It will be set in nextRound when needed
+      // Try to set round_start_turn, but handle gracefully if column doesn't exist
+      const updatePayload: any = {
+        status: "playing",
+        current_round: 1,
+        current_country_index: room.country_indices[0],
+        current_turn: "host", // Always start with host
+        round_answered: false,
+        round_start_turn: "host", // Track that host started round 1
+      };
+
       const { data, error: updateError } = await supabase
         .from("game_rooms")
-        .update({
-          status: "playing",
-          current_round: 1,
-          current_country_index: room.country_indices[0],
-          current_turn: "host", // Always start with host
-          round_answered: false,
-        })
+        .update(updatePayload)
         .eq("id", room.id)
         .select()
         .single();
 
       if (updateError) {
-        throw updateError;
+        // If error is about round_start_turn column not existing, retry without it
+        if (updateError.message?.includes("round_start_turn") || updateError.code === "PGRST116") {
+          const { data: retryData, error: retryError } = await supabase
+            .from("game_rooms")
+            .update({
+              status: "playing",
+              current_round: 1,
+              current_country_index: room.country_indices[0],
+              current_turn: "host",
+              round_answered: false,
+            })
+            .eq("id", room.id)
+            .select()
+            .single();
+
+          if (retryError) {
+            throw retryError;
+          }
+
+          if (retryData) {
+            setRoom(retryData as GameRoom);
+            return;
+          }
+        } else {
+          throw updateError;
+        }
       }
 
       if (data) {
@@ -266,8 +293,11 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       updates.current_turn = nextTurn;
       
       // Check if both players have tried
-      // If we're switching back to the player who started the round, both have tried
-      const roundStartTurn = room.round_start_turn || "host"; // Default to host for backwards compatibility
+      // Round 1 starts with host, round 2 with guest, etc.
+      // If we're switching back to the player who should have started this round, both have tried
+      const expectedRoundStart = room.current_round % 2 === 1 ? "host" : "guest";
+      const roundStartTurn = room.round_start_turn || expectedRoundStart;
+      
       if (nextTurn === roundStartTurn) {
         // We're switching back to the starting player, meaning both have tried and both failed
         updates.round_answered = true; // Mark as answered so we can move to next round
@@ -299,8 +329,11 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     };
 
     // Check if both players have tried
-    // If we're switching back to the player who started the round, both have tried
-    const roundStartTurn = room.round_start_turn || "host"; // Default to host for backwards compatibility
+    // Round 1 starts with host, round 2 with guest, etc.
+    // If we're switching back to the player who should have started this round, both have tried
+    const expectedRoundStart = room.current_round % 2 === 1 ? "host" : "guest";
+    const roundStartTurn = room.round_start_turn || expectedRoundStart;
+    
     if (nextTurn === roundStartTurn) {
       // We're switching back to the starting player, meaning both have tried and both failed
       updates.round_answered = true; // Mark as answered so we can move to next round
@@ -326,27 +359,32 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         .eq("id", room.id);
     } else {
       // Alternate starting player each round
-      // If current round started with host, next round starts with guest, and vice versa
-      const currentRoundStartTurn = room.round_start_turn || "host";
-      const nextTurn = currentRoundStartTurn === "host" ? "guest" : "host";
+      // Round 1 starts with host, round 2 with guest, round 3 with host, etc.
+      // This ensures strict alternation regardless of who found the country
+      const nextTurn: "host" | "guest" = nextRoundNum % 2 === 1 ? "host" : "guest";
       
-      // Build update payload - only include round_start_turn if it exists
+      // Build update payload - try to include round_start_turn
       const updatePayload: any = {
         current_round: nextRoundNum,
         current_country_index: room.country_indices[nextRoundNum - 1],
         current_turn: nextTurn, // Alternate starting player
         round_answered: false,
+        round_start_turn: nextTurn, // Track who starts this round
       };
-
-      // Only add round_start_turn if the field exists in the room (backwards compatibility)
-      if (room.round_start_turn !== undefined) {
-        updatePayload.round_start_turn = nextTurn;
-      }
       
-      await supabase
+      const { error: updateError } = await supabase
         .from("game_rooms")
         .update(updatePayload)
         .eq("id", room.id);
+
+      // If error is about round_start_turn, retry without it
+      if (updateError && (updateError.message?.includes("round_start_turn") || updateError.code === "PGRST116")) {
+        delete updatePayload.round_start_turn;
+        await supabase
+          .from("game_rooms")
+          .update(updatePayload)
+          .eq("id", room.id);
+      }
     }
   }, [room]);
 
