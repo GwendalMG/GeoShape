@@ -26,6 +26,7 @@ const Index = () => {
     joinRoom,
     startGame,
     submitAnswer,
+    handleTimeUp,
     nextRound,
     leaveRoom,
   } = useMultiplayerRoom();
@@ -80,6 +81,7 @@ const Index = () => {
         room={room}
         playerRole={playerRole}
         onSubmitAnswer={submitAnswer}
+        onTimeUp={handleTimeUp}
         onNextRound={nextRound}
         onStartGame={startGame}
         onLeave={handleLeaveMultiplayer}

@@ -13,6 +13,7 @@ interface MultiplayerGameProps {
   room: GameRoom;
   playerRole: "host" | "guest";
   onSubmitAnswer: (answer: string) => Promise<{ correct: boolean; countryName: string }>;
+  onTimeUp: () => Promise<void>;
   onNextRound: () => Promise<void>;
   onStartGame: () => Promise<void>;
   onLeave: () => void;
@@ -31,6 +32,7 @@ export function MultiplayerGame({
   room,
   playerRole,
   onSubmitAnswer,
+  onTimeUp,
   onNextRound,
   onStartGame,
   onLeave,
@@ -94,7 +96,7 @@ export function MultiplayerGame({
   }, [isMyTurn, phase, onSubmitAnswer, onNextRound]);
 
 
-  const handleTimeUp = useCallback(() => {
+  const handleTimeUp = useCallback(async () => {
     if (!isMyTurn) return;
     
     setIsTimerRunning(false);
@@ -105,10 +107,14 @@ export function MultiplayerGame({
     }
     setPhase("revealed");
 
+    // Switch turn immediately
+    await onTimeUp();
+
+    // Then advance to next round after showing the answer
     setTimeout(() => {
       onNextRound();
     }, 3000);
-  }, [isMyTurn, currentCountry, onNextRound]);
+  }, [isMyTurn, currentCountry, onTimeUp, onNextRound]);
 
   // Waiting for guest
   if (room.status === "waiting" && !room.guest_name) {

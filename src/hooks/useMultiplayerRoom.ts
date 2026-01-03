@@ -30,6 +30,7 @@ interface UseMultiplayerRoomReturn {
   joinRoom: (roomCode: string, guestName: string) => Promise<boolean>;
   startGame: () => Promise<void>;
   submitAnswer: (answer: string) => Promise<{ correct: boolean; countryName: string }>;
+  handleTimeUp: () => Promise<void>;
   nextRound: () => Promise<void>;
   leaveRoom: () => void;
 }
@@ -217,8 +218,12 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     const isCorrect = normalizedAnswer === normalizedName || 
                       normalizedAnswer === normalizedNameFr;
 
+    // Always switch turn after answering (whether correct or incorrect)
+    const nextTurn = room.current_turn === "host" ? "guest" : "host";
+
     const updates: Partial<GameRoom> = {
       round_answered: true,
+      current_turn: nextTurn, // Switch turn immediately
     };
 
     if (isCorrect) {
@@ -237,6 +242,21 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     return { correct: isCorrect, countryName: currentCountry.name };
   }, [room, playerRole]);
 
+  const handleTimeUp = useCallback(async () => {
+    if (!room) return;
+
+    // Switch turn immediately when time is up
+    const nextTurn = room.current_turn === "host" ? "guest" : "host";
+
+    await supabase
+      .from("game_rooms")
+      .update({
+        round_answered: true,
+        current_turn: nextTurn, // Switch turn immediately
+      })
+      .eq("id", room.id);
+  }, [room]);
+
   const nextRound = useCallback(async () => {
     if (!room) return;
 
@@ -248,12 +268,14 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         .update({ status: "finished" })
         .eq("id", room.id);
     } else {
+      // Keep the current turn (already switched in submitAnswer or handleTimeUp)
+      // The turn should already be correct from the previous answer/timeout
       await supabase
         .from("game_rooms")
         .update({
           current_round: nextRoundNum,
           current_country_index: room.country_indices[nextRoundNum - 1],
-          current_turn: room.current_turn === "host" ? "guest" : "host",
+          // Don't change turn here - it was already changed after the answer/timeout
           round_answered: false,
         })
         .eq("id", room.id);
@@ -276,6 +298,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     joinRoom,
     startGame,
     submitAnswer,
+    handleTimeUp,
     nextRound,
     leaveRoom,
   };
