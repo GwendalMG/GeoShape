@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Globe, Users, Zap, Wifi } from "lucide-react";
+import { Users, Zap, Wifi } from "lucide-react";
 
 interface GameSetupProps {
   onStart: (player1Name: string, player2Name: string, rounds: number) => void;
@@ -19,11 +19,9 @@ export function GameSetup({ onStart, onMultiplayer }: GameSetupProps) {
       <div className="w-full max-w-lg animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-6 animate-float">
-            <Globe className="w-10 h-10 text-primary" />
-          </div>
           <h1 className="text-5xl font-black mb-3">
-            <span className="text-gradient-gold">GeoShape</span>
+            <span className="text-foreground">Geo</span>
+            <span className="text-gradient-gold">Shape</span>
           </h1>
           <p className="text-muted-foreground text-lg">
             Devine le pays à partir de sa silhouette !

@@ -54,22 +54,30 @@ export function MultiplayerGame({
     setJokersLeft(getJokersCount(room.total_rounds));
   }, [room.total_rounds]);
 
-  // Reset phase when round changes
+  // Reset phase when round changes or turn switches
   useEffect(() => {
     if (room.status === "playing" && !room.round_answered) {
+      // New round or turn switch, but round not finished yet
       setPhase("playing");
       setFeedback(null);
       setRevealedCountryName("");
-      setIsTimerRunning(true);
+      setIsTimerRunning(isMyTurn); // Only start timer if it's my turn
       setHint(null);
     } else if (room.round_answered) {
+      // Round is finished (either someone found it or both failed)
+      // Show the answer
       setPhase("revealed");
       setIsTimerRunning(false);
       if (currentCountry) {
         setRevealedCountryName(currentCountry.nameFr);
       }
+      // Auto advance to next round after showing the answer (3 seconds)
+      const timeoutId = setTimeout(() => {
+        onNextRound();
+      }, 3000);
+      return () => clearTimeout(timeoutId);
     }
-  }, [room.current_round, room.round_answered, room.status, currentCountry]);
+  }, [room.current_round, room.round_answered, room.status, room.current_turn, currentCountry, isMyTurn, onNextRound]);
 
   const useJoker = useCallback(() => {
     if (!currentCountry || phase !== "playing" || jokersLeft <= 0 || !isMyTurn) return;
@@ -86,13 +94,23 @@ export function MultiplayerGame({
     setHint(null);
     const result = await onSubmitAnswer(answer);
     setFeedback(result.correct ? "correct" : "incorrect");
-    setRevealedCountryName(result.countryName);
-    setPhase("revealed");
-
-    // Auto advance after 3 seconds to see the answer
-    setTimeout(() => {
-      onNextRound();
-    }, 3000);
+    
+    if (result.correct) {
+      // If correct, reveal the country and advance to next round
+      setRevealedCountryName(result.countryName);
+      setPhase("revealed");
+      setTimeout(() => {
+        onNextRound();
+      }, 3000);
+    } else {
+      // If wrong, just show feedback briefly, then let the other player try
+      // Don't reveal the country name yet - the other player can still try
+      // The room.round_answered will be updated by submitAnswer if both have tried
+      setTimeout(() => {
+        setFeedback(null);
+        setPhase("playing"); // Stay in playing phase for the other player
+      }, 2000);
+    }
   }, [isMyTurn, phase, onSubmitAnswer, onNextRound]);
 
 
@@ -102,19 +120,17 @@ export function MultiplayerGame({
     setIsTimerRunning(false);
     setHint(null);
     setFeedback("incorrect");
-    if (currentCountry) {
-      setRevealedCountryName(currentCountry.nameFr);
-    }
-    setPhase("revealed");
 
-    // Switch turn immediately
+    // Switch turn immediately to let the other player try
     await onTimeUp();
 
-    // Then advance to next round after showing the answer
+    // Don't reveal the country yet - the other player can still try
+    // The useEffect will handle showing the answer when round_answered becomes true
     setTimeout(() => {
-      onNextRound();
-    }, 3000);
-  }, [isMyTurn, currentCountry, onTimeUp, onNextRound]);
+      setFeedback(null);
+      setPhase("playing"); // Stay in playing phase for the other player
+    }, 2000);
+  }, [isMyTurn, onTimeUp]);
 
   // Waiting for guest
   if (room.status === "waiting" && !room.guest_name) {

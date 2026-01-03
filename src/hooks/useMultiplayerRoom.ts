@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { countries } from "@/data/countries";
+import { countries, checkAnswer } from "@/data/countries";
 
 export interface GameRoom {
   id: string;
@@ -16,6 +16,7 @@ export interface GameRoom {
   current_turn: "host" | "guest" | null;
   country_indices: number[];
   round_answered: boolean;
+  round_start_turn: "host" | "guest" | null; // Track who started the current round
   created_at: string;
   updated_at: string;
 }
@@ -196,8 +197,9 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
           status: "playing",
           current_round: 1,
           current_country_index: room.country_indices[0],
-          current_turn: "host",
+          current_turn: "host", // Always start with host
           round_answered: false,
+          round_start_turn: "host", // Track that host started round 1
         })
         .eq("id", room.id);
     } catch (err) {
@@ -211,27 +213,35 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     }
 
     const currentCountry = countries[room.current_country_index];
-    const normalizedAnswer = answer.toLowerCase().trim();
-    const normalizedName = currentCountry.name.toLowerCase();
-    const normalizedNameFr = currentCountry.nameFr.toLowerCase();
+    // Use the same checkAnswer function that includes fuzzy matching
+    const isCorrect = checkAnswer(answer, currentCountry);
 
-    const isCorrect = normalizedAnswer === normalizedName || 
-                      normalizedAnswer === normalizedNameFr;
-
-    // Always switch turn after answering (whether correct or incorrect)
-    const nextTurn = room.current_turn === "host" ? "guest" : "host";
-
-    const updates: Partial<GameRoom> = {
-      round_answered: true,
-      current_turn: nextTurn, // Switch turn immediately
-    };
+    const updates: Partial<GameRoom> = {};
 
     if (isCorrect) {
+      // If correct, mark round as answered and give point
+      // Don't switch turn - we'll go to next round directly
+      updates.round_answered = true;
       if (playerRole === "host") {
         updates.host_score = room.host_score + 1;
       } else {
         updates.guest_score = room.guest_score + 1;
       }
+    } else {
+      // If wrong, switch turn to let the other player try
+      // This allows the other player to try the same country
+      const nextTurn = room.current_turn === "host" ? "guest" : "host";
+      updates.current_turn = nextTurn;
+      
+      // Check if both players have tried
+      // If we're switching back to the player who started the round, both have tried
+      const roundStartTurn = room.round_start_turn || "host"; // Default to host for backwards compatibility
+      if (nextTurn === roundStartTurn) {
+        // We're switching back to the starting player, meaning both have tried and both failed
+        updates.round_answered = true; // Mark as answered so we can move to next round
+      }
+      // Otherwise, the other player still needs to try
+      // So don't mark as answered yet
     }
 
     await supabase
@@ -248,12 +258,27 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     // Switch turn immediately when time is up
     const nextTurn = room.current_turn === "host" ? "guest" : "host";
 
+    // Check if both players have tried (similar logic to submitAnswer)
+    // Rounds always start with host, so:
+    // - If host's time is up → switch to guest (guest can try)
+    // - If guest's time is up → switch back to host (both have tried, end round)
+    const updates: Partial<GameRoom> = {
+      current_turn: nextTurn, // Switch turn immediately
+    };
+
+    // Check if both players have tried
+    // If we're switching back to the player who started the round, both have tried
+    const roundStartTurn = room.round_start_turn || "host"; // Default to host for backwards compatibility
+    if (nextTurn === roundStartTurn) {
+      // We're switching back to the starting player, meaning both have tried and both failed
+      updates.round_answered = true; // Mark as answered so we can move to next round
+    }
+    // Otherwise, the other player still needs to try
+    // So don't mark as answered yet
+
     await supabase
       .from("game_rooms")
-      .update({
-        round_answered: true,
-        current_turn: nextTurn, // Switch turn immediately
-      })
+      .update(updates)
       .eq("id", room.id);
   }, [room]);
 
@@ -268,14 +293,18 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         .update({ status: "finished" })
         .eq("id", room.id);
     } else {
-      // Keep the current turn (already switched in submitAnswer or handleTimeUp)
-      // The turn should already be correct from the previous answer/timeout
+      // Alternate starting player each round
+      // If current round started with host, next round starts with guest, and vice versa
+      const currentRoundStartTurn = room.round_start_turn || "host";
+      const nextTurn = currentRoundStartTurn === "host" ? "guest" : "host";
+      
       await supabase
         .from("game_rooms")
         .update({
           current_round: nextRoundNum,
           current_country_index: room.country_indices[nextRoundNum - 1],
-          // Don't change turn here - it was already changed after the answer/timeout
+          current_turn: nextTurn, // Alternate starting player
+          round_start_turn: nextTurn, // Track who starts this round
           round_answered: false,
         })
         .eq("id", room.id);

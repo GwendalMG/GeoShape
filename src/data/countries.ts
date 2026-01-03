@@ -265,13 +265,23 @@ export function checkAnswer(answer: string, country: Country): boolean {
   }
 
   // Fuzzy matching with Levenshtein distance
-  // Accept if similarity is >= 0.85 (allows for small typos)
+  // More lenient thresholds for better typo tolerance
   const similarityEn = similarity(normalizedAnswer, normalizedName);
   const similarityFr = similarity(normalizedAnswer, normalizedNameFr);
   
-  // For longer answers (>= 5 chars), use 0.85 threshold
-  // For shorter answers (4 chars), use 0.75 threshold (more lenient)
-  const threshold = normalizedAnswer.length >= 5 ? 0.85 : 0.75;
+  // More lenient thresholds based on answer length
+  // Longer answers: 0.75 (was 0.85), shorter: 0.65 (was 0.75)
+  // This allows for more typos while still being accurate
+  let threshold: number;
+  if (normalizedAnswer.length >= 8) {
+    threshold = 0.75; // Very lenient for long answers
+  } else if (normalizedAnswer.length >= 5) {
+    threshold = 0.70; // Lenient for medium answers
+  } else if (normalizedAnswer.length >= 4) {
+    threshold = 0.65; // More lenient for short answers
+  } else {
+    threshold = 0.60; // Very lenient for very short answers
+  }
   
   if (similarityEn >= threshold || similarityFr >= threshold) {
     return true;
