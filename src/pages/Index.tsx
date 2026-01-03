@@ -85,6 +85,8 @@ const Index = () => {
         onNextRound={nextRound}
         onStartGame={startGame}
         onLeave={handleLeaveMultiplayer}
+        loading={loading}
+        error={error}
       />
     );
   }

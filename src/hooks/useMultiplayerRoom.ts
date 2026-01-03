@@ -188,10 +188,26 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
   }, []);
 
   const startGame = useCallback(async () => {
-    if (!room || playerRole !== "host") return;
+    if (!room || playerRole !== "host") {
+      setError("Vous devez être l'hôte pour lancer la partie");
+      return;
+    }
+
+    if (!room.guest_name) {
+      setError("Un adversaire doit rejoindre la room avant de lancer la partie");
+      return;
+    }
+
+    if (!room.country_indices || room.country_indices.length === 0) {
+      setError("Erreur: Aucun pays n'a été sélectionné pour cette partie");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
 
     try {
-      await supabase
+      const { data, error: updateError } = await supabase
         .from("game_rooms")
         .update({
           status: "playing",
@@ -201,9 +217,23 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
           round_answered: false,
           round_start_turn: "host", // Track that host started round 1
         })
-        .eq("id", room.id);
+        .eq("id", room.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      if (data) {
+        setRoom(data as GameRoom);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start game");
+      const errorMessage = err instanceof Error ? err.message : "Failed to start game";
+      setError(errorMessage);
+      console.error("Error starting game:", err);
+    } finally {
+      setLoading(false);
     }
   }, [room, playerRole]);
 

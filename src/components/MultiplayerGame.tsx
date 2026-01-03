@@ -17,6 +17,8 @@ interface MultiplayerGameProps {
   onNextRound: () => Promise<void>;
   onStartGame: () => Promise<void>;
   onLeave: () => void;
+  loading?: boolean;
+  error?: string | null;
 }
 
 type GamePhase = "waiting" | "playing" | "revealed";
@@ -36,6 +38,8 @@ export function MultiplayerGame({
   onNextRound,
   onStartGame,
   onLeave,
+  loading = false,
+  error = null,
 }: MultiplayerGameProps) {
   const [phase, setPhase] = useState<GamePhase>("waiting");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
@@ -178,12 +182,20 @@ export function MultiplayerGame({
             </div>
           </div>
           {playerRole === "host" ? (
-            <Button
-              onClick={onStartGame}
-              className="py-4 md:py-6 px-8 md:px-12 text-lg md:text-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl glow-gold"
-            >
-              Lancer la partie !
-            </Button>
+            <>
+              <Button
+                onClick={onStartGame}
+                disabled={loading}
+                className="py-4 md:py-6 px-8 md:px-12 text-lg md:text-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl glow-gold disabled:opacity-50"
+              >
+                {loading ? "Lancement..." : "Lancer la partie !"}
+              </Button>
+              {error && (
+                <p className="text-destructive text-sm md:text-base mt-4 animate-fade-in">
+                  {error}
+                </p>
+              )}
+            </>
           ) : (
             <p className="text-muted-foreground animate-pulse text-sm md:text-base">
               En attente du lancement par l'hôte...
