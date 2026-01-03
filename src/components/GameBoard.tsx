@@ -45,6 +45,9 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
     const jokersCount = getJokersCount(totalRounds);
     setJokers({ player1: jokersCount, player2: jokersCount });
     setAttemptsThisRound(0); // Reset attempts when starting new game
+    // Round 0 always starts with player 1
+    setCurrentPlayer(1);
+    setRoundStartPlayer(1);
   }, [totalRounds]);
   
   const currentCountry = countries[currentRound];
@@ -165,10 +168,13 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
     if (currentRound + 1 >= totalRounds) {
       setPhase("finished");
     } else {
-      setCurrentRound((prev) => prev + 1);
-      // Alternate starting player each round
-      // If round started with player 1, next round starts with player 2, and vice versa
-      const nextStartPlayer = roundStartPlayer === 1 ? 2 : 1;
+      const nextRoundNum = currentRound + 1;
+      setCurrentRound(nextRoundNum);
+      // Alternate starting player each round strictly based on round number
+      // Round 0 (first round) starts with player 1, round 1 with player 2, round 2 with player 1, etc.
+      // This ensures strict alternation regardless of who found the country
+      // Round 0 = Player 1, Round 1 = Player 2, Round 2 = Player 1, etc.
+      const nextStartPlayer: 1 | 2 = nextRoundNum % 2 === 0 ? 1 : 2;
       setCurrentPlayer(nextStartPlayer);
       setRoundStartPlayer(nextStartPlayer);
       setAttemptsThisRound(0); // Reset attempts counter for new round

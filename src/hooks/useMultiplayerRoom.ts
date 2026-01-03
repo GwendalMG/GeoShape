@@ -271,6 +271,19 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       return { correct: false, countryName: "" };
     }
 
+    // Verify it's actually this player's turn to prevent double plays
+    const isMyTurn = room.current_turn === playerRole;
+    if (!isMyTurn) {
+      console.warn("Attempted to submit answer when it's not my turn");
+      return { correct: false, countryName: "" };
+    }
+
+    // Verify round is not already answered
+    if (room.round_answered) {
+      console.warn("Attempted to submit answer when round is already answered");
+      return { correct: false, countryName: "" };
+    }
+
     const currentCountry = countries[room.current_country_index];
     // Use the same checkAnswer function that includes fuzzy matching
     const isCorrect = checkAnswer(answer, currentCountry);

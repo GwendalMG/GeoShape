@@ -98,7 +98,8 @@ export function MultiplayerGame({
   }, [currentCountry, phase, jokersLeft, isMyTurn]);
 
   const handleAnswer = useCallback(async (answer: string) => {
-    if (!isMyTurn || phase !== "playing") return;
+    // Double-check it's my turn and round is not answered to prevent double plays
+    if (!isMyTurn || phase !== "playing" || room.round_answered) return;
 
     setIsTimerRunning(false);
     setHint(null);
@@ -119,7 +120,7 @@ export function MultiplayerGame({
         setFeedback(null);
       }, 1000);
     }
-  }, [isMyTurn, phase, onSubmitAnswer]);
+  }, [isMyTurn, phase, room.round_answered, onSubmitAnswer]);
 
 
   const handleTimeUp = useCallback(async () => {
