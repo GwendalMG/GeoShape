@@ -80,16 +80,9 @@ export function AnswerInput({ onSubmit, disabled, playerNumber, feedback }: Answ
             )}
           >
             {feedback === "correct" ? (
-              <span className="inline-flex items-center gap-2">
-                <span className="text-2xl">🎉</span>
-                <span>Bonne réponse !</span>
-                <span className="text-2xl">🎉</span>
-              </span>
+              <span>Bonne réponse !</span>
             ) : (
-              <span className="inline-flex items-center gap-2">
-                <span>✗</span>
-                <span>Mauvaise réponse...</span>
-              </span>
+              <span>Mauvaise réponse...</span>
             )}
           </p>
         </div>

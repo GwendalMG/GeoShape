@@ -340,18 +340,18 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
         </div>
       )}
       
-      {/* Answer Input */}
-      {phase === "playing" && (
+      {/* Answer Input - shown in both playing and revealed phases to display feedback */}
+      {(phase === "playing" || phase === "revealed") && (
         <div className="space-y-2 flex-shrink-0">
           <AnswerInput
             onSubmit={handleAnswer}
-            disabled={!isTimerRunning}
+            disabled={phase === "revealed" || !isTimerRunning}
             playerNumber={currentPlayer}
             feedback={feedback}
           />
           
-          {/* Joker Button */}
-          {jokers[currentPlayer === 1 ? "player1" : "player2"] > 0 && !hint && (
+          {/* Joker Button - only shown during playing phase */}
+          {phase === "playing" && jokers[currentPlayer === 1 ? "player1" : "player2"] > 0 && !hint && (
             <div className="text-center">
               <Button
                 onClick={useJoker}
@@ -364,15 +364,6 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
               </Button>
             </div>
           )}
-        </div>
-      )}
-      
-      {/* Revealed - just show the country name */}
-      {phase === "revealed" && (
-        <div className="text-center animate-fade-in flex-shrink-0">
-          <p className="text-lg md:text-xl font-bold text-success">
-            C'était : {currentCountry.nameFr}
-          </p>
         </div>
       )}
     </div>

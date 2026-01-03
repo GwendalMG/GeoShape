@@ -81,16 +81,13 @@ export function MultiplayerGame({
       }
       setPhase("revealed");
       setIsTimerRunning(false);
-      if (currentCountry) {
-        setRevealedCountryName(currentCountry.nameFr);
-      }
-      // Auto advance to next round after showing the answer (3 seconds)
+      // Auto advance to next round after showing the answer (3 seconds, same as local mode)
       const timeoutId = setTimeout(() => {
         onNextRound();
       }, 3000);
       return () => clearTimeout(timeoutId);
     }
-  }, [room.current_round, room.round_answered, room.status, room.current_turn, currentCountry, isMyTurn, onNextRound, feedback]);
+  }, [room.current_round, room.round_answered, room.status, room.current_turn, isMyTurn, onNextRound]);
 
   const useJoker = useCallback(() => {
     if (!currentCountry || phase !== "playing" || jokersLeft <= 0 || !isMyTurn) return;
@@ -109,16 +106,20 @@ export function MultiplayerGame({
     setFeedback(result.correct ? "correct" : "incorrect");
     
     if (result.correct) {
-      // If correct, reveal the country
-      // The round_answered will be set to true, triggering the useEffect
-      // which will handle showing "revealed" phase with my feedback
-      setRevealedCountryName(result.countryName);
+      // If correct, wait 1 second then go to revealed phase (same as local mode)
+      setTimeout(() => {
+        setPhase("revealed");
+        // The round_answered will be set to true, triggering the useEffect
+        // which will handle the next round transition after 3 seconds
+      }, 1000);
     } else {
-      // If wrong, show feedback briefly
+      // If wrong, show feedback briefly then clear it (same as local mode)
       // The turn will switch, triggering the useEffect to reset feedback for the other player
-      // The other player will see no feedback since they haven't played yet
+      setTimeout(() => {
+        setFeedback(null);
+      }, 1000);
     }
-  }, [isMyTurn, phase, onSubmitAnswer, onNextRound]);
+  }, [isMyTurn, phase, onSubmitAnswer]);
 
 
   const handleTimeUp = useCallback(async () => {
@@ -131,12 +132,10 @@ export function MultiplayerGame({
     // Switch turn immediately to let the other player try
     await onTimeUp();
 
-    // Don't reveal the country yet - the other player can still try
-    // The useEffect will handle showing the answer when round_answered becomes true
+    // Clear feedback after 1 second (same as local mode)
     setTimeout(() => {
       setFeedback(null);
-      setPhase("playing"); // Stay in playing phase for the other player
-    }, 2000);
+    }, 1000);
   }, [isMyTurn, onTimeUp]);
 
   // Waiting for guest
@@ -375,17 +374,18 @@ export function MultiplayerGame({
           </div>
         )}
 
-        {phase === "playing" && isMyTurn && (
+        {/* Answer Input - shown in both playing and revealed phases to display feedback (same as local mode) */}
+        {((phase === "playing" && isMyTurn) || (phase === "revealed" && feedback)) && (
           <div className="space-y-3 md:space-y-4">
             <AnswerInput
               onSubmit={handleAnswer}
-              disabled={false}
+              disabled={phase === "revealed" || !isMyTurn}
               playerNumber={playerRole === "host" ? 1 : 2}
               feedback={feedback === "incorrect" ? "wrong" : feedback}
             />
             
-            {/* Joker Button */}
-            {jokersLeft > 0 && !hint && (
+            {/* Joker Button - only shown during playing phase */}
+            {phase === "playing" && isMyTurn && jokersLeft > 0 && !hint && (
               <div className="text-center">
                 <Button
                   onClick={useJoker}
@@ -398,24 +398,6 @@ export function MultiplayerGame({
                 </Button>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Revealed - just show the country name */}
-        {phase === "revealed" && currentCountry && (
-          <div className="text-center animate-fade-in space-y-3 md:space-y-4">
-            {/* Only show feedback if I actually played (have feedback) */}
-            {feedback && (
-              <p className={cn(
-                "text-lg md:text-xl font-bold",
-                feedback === "correct" ? "text-success" : "text-destructive"
-              )}>
-                {feedback === "correct" ? "✓ Bonne réponse !" : "✗ Mauvaise réponse..."}
-              </p>
-            )}
-            <p className="text-lg md:text-xl font-bold text-foreground">
-              C'était : {revealedCountryName}
-            </p>
           </div>
         )}
       </div>
