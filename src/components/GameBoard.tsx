@@ -33,8 +33,9 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [roundResults, setRoundResults] = useState<Array<{ winner: 1 | 2 | null }>>([]);
-  
-  // Jokers state
+  const [roundStartPlayer, setRoundStartPlayer] = useState<1 | 2>(1); // Track who started the round
+    
+    // Jokers state
   const [jokers, setJokers] = useState({ player1: 0, player2: 0 });
   const [hint, setHint] = useState<string | null>(null);
   
@@ -44,6 +45,7 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
     setJokers({ player1: jokersCount, player2: jokersCount });
     // Round 0 always starts with player 1
     setCurrentPlayer(1);
+    setRoundStartPlayer(1);
   }, [totalRounds]);
   
   const currentCountry = countries[currentRound];
@@ -81,7 +83,8 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
       setTimeout(() => {
         setPhase("revealed");
         setTimeout(() => {
-          goToNextRound();
+          // If correct, go to next round and alternate starting player
+          goToNextRound(true);
         }, 3000); // 3 seconds to see the answer
       }, 1000);
     } else {
@@ -91,13 +94,18 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
         setFeedback(null);
         setHint(null);
         if (currentPlayer === 1) {
+          // Player 1 failed, switch to player 2 to try the same country
           setCurrentPlayer(2);
           setIsTimerRunning(true);
+          setPhase("playing");
         } else {
+          // Player 2 failed, and player 1 already failed
+          // Both players failed, go to next round
           setRoundResults((prev) => [...prev, { winner: null }]);
           setPhase("revealed");
           setTimeout(() => {
-            goToNextRound();
+            // If both failed, go to next round and alternate starting player
+            goToNextRound(false);
           }, 3000); // 3 seconds to see the answer
         }
       }, 1000);
@@ -112,29 +120,36 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
     setTimeout(() => {
       setFeedback(null);
       if (currentPlayer === 1) {
+        // Player 1 time up, switch to player 2 to try the same country
         setCurrentPlayer(2);
         setIsTimerRunning(true);
+        setPhase("playing");
       } else {
+        // Player 2 time up, and player 1 already failed
+        // Both players failed, go to next round
         setRoundResults((prev) => [...prev, { winner: null }]);
         setPhase("revealed");
         setTimeout(() => {
-          goToNextRound();
+          // If both failed, go to next round and alternate starting player
+          goToNextRound(false);
         }, 3000); // 3 seconds to see the answer
       }
     }, 1000);
   }, [currentPlayer]);
   
-  const goToNextRound = () => {
+  const goToNextRound = (wasCorrect: boolean) => {
     if (currentRound + 1 >= totalRounds) {
       setPhase("finished");
     } else {
       const nextRoundNum = currentRound + 1;
       setCurrentRound(nextRoundNum);
-      // Alternate starting player each round strictly based on round number
-      // Round 0 = Player 1, Round 1 = Player 2, Round 2 = Player 1, etc.
-      // This ensures strict alternation regardless of who found the country or who failed
-      const nextStartPlayer: 1 | 2 = nextRoundNum % 2 === 0 ? 1 : 2;
+      
+      // Determine next starting player:
+      // - If someone found the country: alternate from the current starting player
+      // - If both failed: alternate from the current starting player (so the other player starts)
+      const nextStartPlayer: 1 | 2 = roundStartPlayer === 1 ? 2 : 1;
       setCurrentPlayer(nextStartPlayer);
+      setRoundStartPlayer(nextStartPlayer);
       setPhase("playing");
       setIsTimerRunning(true);
       setFeedback(null);
