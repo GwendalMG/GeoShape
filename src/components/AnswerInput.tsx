@@ -6,9 +6,10 @@ interface AnswerInputProps {
   disabled: boolean;
   playerNumber: 1 | 2;
   feedback?: "correct" | "wrong" | null;
+  isHardCountry?: boolean;
 }
 
-export function AnswerInput({ onSubmit, disabled, playerNumber, feedback }: AnswerInputProps) {
+export function AnswerInput({ onSubmit, disabled, playerNumber, feedback, isHardCountry = false }: AnswerInputProps) {
   const [value, setValue] = useState("");
   const isPlayerOne = playerNumber === 1;
   
@@ -80,7 +81,15 @@ export function AnswerInput({ onSubmit, disabled, playerNumber, feedback }: Answ
             )}
           >
             {feedback === "correct" ? (
-              <span>Bonne réponse !</span>
+              <span>
+                {isHardCountry ? (
+                  <>
+                    🏆 Excellent ! Pays difficile trouvé ! 🏆
+                  </>
+                ) : (
+                  "Bonne réponse !"
+                )}
+              </span>
             ) : (
               <span>Mauvaise réponse...</span>
             )}

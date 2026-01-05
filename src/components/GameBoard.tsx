@@ -80,6 +80,15 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
       }));
       setRoundResults((prev) => [...prev, { winner: currentPlayer }]);
       
+      // If it's a hard country, give +1 joker
+      if (currentCountry.difficulty === 'DIFFICILE') {
+        const currentJokerKey = currentPlayer === 1 ? "player1" : "player2";
+        setJokers((prev) => ({
+          ...prev,
+          [currentJokerKey]: prev[currentJokerKey] + 1
+        }));
+      }
+      
       setTimeout(() => {
         setPhase("revealed");
         setTimeout(() => {
@@ -326,6 +335,7 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
             disabled={!isTimerRunning}
             playerNumber={currentPlayer}
             feedback={feedback}
+            isHardCountry={currentCountry?.difficulty === 'DIFFICILE'}
           />
           
           {/* Joker Button */}

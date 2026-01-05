@@ -107,6 +107,11 @@ export function MultiplayerGame({
     setFeedback(result.correct ? "correct" : "incorrect");
     
     if (result.correct) {
+      // If it's a hard country, give +1 joker
+      if (currentCountry && currentCountry.difficulty === 'DIFFICILE') {
+        setJokersLeft(prev => prev + 1);
+      }
+      
       // If correct, wait 1 second then go to revealed phase (same as local mode)
       setTimeout(() => {
         setPhase("revealed");
@@ -383,6 +388,7 @@ export function MultiplayerGame({
               disabled={phase === "revealed" || !isMyTurn}
               playerNumber={playerRole === "host" ? 1 : 2}
               feedback={feedback === "incorrect" ? "wrong" : feedback}
+              isHardCountry={currentCountry?.difficulty === 'DIFFICILE'}
             />
             
             {/* Joker Button - only shown during playing phase */}
