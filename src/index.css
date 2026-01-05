@@ -63,10 +63,20 @@
     background: var(--gradient-ocean);
     background-attachment: fixed;
     min-height: 100%;
+    height: 100%;
   }
 
   body {
-    @apply bg-background text-foreground font-outfit antialiased;
+    @apply text-foreground font-outfit antialiased;
+    background: var(--gradient-ocean);
+    background-attachment: fixed;
+    min-height: 100vh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #root {
     background: var(--gradient-ocean);
     background-attachment: fixed;
     min-height: 100vh;
