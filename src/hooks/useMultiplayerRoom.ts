@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { countries, checkAnswer } from "@/data/countries";
+import { countries, checkAnswer, getRandomCountries } from "@/data/countries";
 
 export interface GameRoom {
   id: string;
@@ -17,6 +17,7 @@ export interface GameRoom {
   country_indices: number[];
   round_answered: boolean;
   round_start_turn: "host" | "guest" | null; // Track who started the current round
+  used_country_ids: string[] | null; // Track country IDs used in this session
   created_at: string;
   updated_at: string;
 }
@@ -106,9 +107,10 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       }
 
       const roomCode = generateRoomCode();
-      const countryIndices = shuffleArray(
-        Array.from({ length: countries.length }, (_, i) => i)
-      ).slice(0, totalRounds);
+      // Select first country, excluding none (empty array)
+      const firstCountry = getRandomCountries(1, []);
+      const firstCountryIndex = countries.findIndex(c => c.id === firstCountry[0]?.id);
+      const countryIndices = firstCountryIndex >= 0 ? [firstCountryIndex] : [];
 
       const { data, error: insertError } = await supabase
         .from("game_rooms")
@@ -117,6 +119,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
           host_name: hostName,
           total_rounds: totalRounds,
           country_indices: countryIndices,
+          used_country_ids: [],
         })
         .select()
         .single();
@@ -395,6 +398,32 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         .update({ status: "finished" })
         .eq("id", room.id);
     } else {
+      // Add current country to used list
+      const currentCountry = room.current_country_index !== null ? countries[room.current_country_index] : null;
+      let newUsedCountryIds = room.used_country_ids || [];
+      
+      if (currentCountry) {
+        newUsedCountryIds = [...newUsedCountryIds, currentCountry.id];
+        // If all countries have been used, reset the list
+        if (newUsedCountryIds.length >= countries.length) {
+          newUsedCountryIds = [];
+        }
+      }
+      
+      // Get next country, excluding already used ones
+      const nextCountry = getRandomCountries(1, newUsedCountryIds);
+      const nextCountryIndex = nextCountry.length > 0 
+        ? countries.findIndex(c => c.id === nextCountry[0].id)
+        : null;
+      
+      // Update country_indices array
+      const updatedCountryIndices = [...(room.country_indices || [])];
+      if (nextCountryIndex >= 0 && nextRoundNum - 1 < updatedCountryIndices.length) {
+        updatedCountryIndices[nextRoundNum - 1] = nextCountryIndex;
+      } else if (nextCountryIndex >= 0) {
+        updatedCountryIndices.push(nextCountryIndex);
+      }
+      
       // Alternate starting player based on who started the previous round
       // If previous round started with host, next round starts with guest, and vice versa
       // This ensures strict alternation regardless of who found the country or who failed
@@ -404,10 +433,12 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       // Build update payload - try to include round_start_turn
       const updatePayload: any = {
         current_round: nextRoundNum,
-        current_country_index: room.country_indices[nextRoundNum - 1],
+        current_country_index: nextCountryIndex,
         current_turn: nextTurn, // Alternate starting player
         round_answered: false,
         round_start_turn: nextTurn, // Track who starts this round
+        country_indices: updatedCountryIndices,
+        used_country_ids: newUsedCountryIds,
       };
       
       const { error: updateError } = await supabase
@@ -415,9 +446,10 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         .update(updatePayload)
         .eq("id", room.id);
 
-      // If error is about round_start_turn, retry without it
-      if (updateError && (updateError.message?.includes("round_start_turn") || updateError.code === "PGRST116")) {
+      // If error is about round_start_turn or used_country_ids, retry without it
+      if (updateError && (updateError.message?.includes("round_start_turn") || updateError.message?.includes("used_country_ids") || updateError.code === "PGRST116")) {
         delete updatePayload.round_start_turn;
+        delete updatePayload.used_country_ids;
         await supabase
           .from("game_rooms")
           .update(updatePayload)

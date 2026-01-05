@@ -59,7 +59,6 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
   const isSolo = numPlayers === 1;
   
   const [countries, setCountries] = useState<Country[]>([]);
-  const [usedCountryIds, setUsedCountryIds] = useState<Set<string>>(new Set()); // Track countries used in this session
   const [currentRound, setCurrentRound] = useState(0);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [scores, setScores] = useState<number[]>(new Array(numPlayers).fill(0));
@@ -72,6 +71,7 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
   // Removed playerOnFire - no green animation on score
   const [attemptsThisRound, setAttemptsThisRound] = useState(0);
   const [frozenPlayerIndex, setFrozenPlayerIndex] = useState<number | null>(null); // Player who is frozen this round
+  const [usedCountryIds, setUsedCountryIds] = useState<string[]>([]); // Track countries used in this session
   
   // Jokers state - array for each player with hint (indice), freeze, and sabotage jokers
   // hint = joker indice (révèle la 1ère lettre), separate from initial hint jokers
@@ -107,8 +107,7 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
   
   useEffect(() => {
     try {
-      const excludeIds = Array.from(usedCountryIds);
-      const randomCountries = getRandomCountries(totalRounds, excludeIds);
+      const randomCountries = getRandomCountries(totalRounds, usedCountryIds);
       if (randomCountries.length === 0) {
         console.error("getRandomCountries returned empty array for", totalRounds, "rounds");
         return;
@@ -147,54 +146,55 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
   }, [numPlayers, frozenPlayerIndex]);
   
   const goToNextRound = useCallback((wasCorrect: boolean) => {
-    // Add current country to used countries list
-    if (currentCountry) {
+    if (currentRound + 1 >= totalRounds) {
+      setPhase("finished");
+    } else {
+      const nextRoundNum = currentRound + 1;
+      
+      // Add current country to used list and get next country
       setUsedCountryIds(prev => {
-        const newSet = new Set(prev);
-        newSet.add(currentCountry.id);
-        
-        // If all countries have been used, reset the set
-        if (newSet.size >= allCountries.length) {
-          return new Set();
+        let newUsed = prev;
+        if (currentCountry) {
+          newUsed = [...prev, currentCountry.id];
+          // If all countries have been used, reset the list
+          if (newUsed.length >= allCountries.length) {
+            newUsed = [];
+          }
         }
         
-        return newSet;
+        // Get next country, excluding already used ones
+        const nextCountry = getRandomCountries(1, newUsed);
+        if (nextCountry.length > 0) {
+          setCountries(prevCountries => {
+            const newCountries = [...prevCountries];
+            if (nextRoundNum < newCountries.length) {
+              newCountries[nextRoundNum] = nextCountry[0];
+            } else {
+              newCountries.push(nextCountry[0]);
+            }
+            return newCountries;
+          });
+        }
+        
+        return newUsed;
       });
-    }
-    
-    const nextRoundNum = currentRound + 1;
-    
-    // Check if we've reached the end of the game
-    // currentRound is 0-based: rounds are 0, 1, 2, ..., totalRounds-1
-    // If totalRounds = 10, we have rounds 0-9 (10 rounds total)
-    // When currentRound = 9 (last round), nextRoundNum = 10, which should end the game
-    console.log(`goToNextRound: currentRound=${currentRound}, nextRoundNum=${nextRoundNum}, totalRounds=${totalRounds}`);
-    
-    if (nextRoundNum >= totalRounds) {
-      console.log("Game finished! Setting phase to finished");
-      setPhase("finished");
-      setIsTimerRunning(false);
+      
+      setCurrentRound(nextRoundNum);
+      
+      // Determine next starting player: alternate based on round number
+      let nextStartPlayerIndex = nextRoundNum % numPlayers;
+      
+      // Reset frozen state for new round
+      setFrozenPlayerIndex(null);
+      
+      setCurrentPlayerIndex(nextStartPlayerIndex);
+      setRoundStartPlayerIndex(nextStartPlayerIndex);
+      setAttemptsThisRound(0);
+      setPhase("playing");
+      setIsTimerRunning(true);
       setFeedback(null);
       setHint(null);
-      return;
     }
-    
-    // Continue to next round
-    setCurrentRound(nextRoundNum);
-    
-    // Determine next starting player: alternate based on round number
-    let nextStartPlayerIndex = nextRoundNum % numPlayers;
-    
-    // Reset frozen state for new round
-    setFrozenPlayerIndex(null);
-    
-    setCurrentPlayerIndex(nextStartPlayerIndex);
-    setRoundStartPlayerIndex(nextStartPlayerIndex);
-    setAttemptsThisRound(0);
-    setPhase("playing");
-    setIsTimerRunning(true);
-    setFeedback(null);
-    setHint(null);
   }, [currentRound, totalRounds, numPlayers, currentCountry]);
   
   const useHintJoker = useCallback(() => {
@@ -506,16 +506,10 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
         </div>
       );
     }
-    // Check if we've finished all rounds - use totalRounds instead of countries.length
-    if (currentRound >= totalRounds) {
-      // This should not happen if goToNextRound works correctly, but as a safety check
-      setPhase("finished");
-    }
-    
-    if (!currentCountry || (currentRound < totalRounds && currentRound >= countries.length)) {
+    if (!currentCountry || currentRound >= countries.length) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-xl text-destructive">Erreur : Pays introuvable (Round {currentRound + 1}/{totalRounds}, Countries: {countries.length})</div>
+          <div className="text-xl text-destructive">Erreur : Pays introuvable (Round {currentRound + 1}/{countries.length})</div>
         </div>
       );
     }
@@ -598,9 +592,8 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
           <Button
             onClick={() => {
               // Rejouer: keep same players, reset everything including used countries
-              setUsedCountryIds(new Set()); // Reset used countries list
-              const excludeIds: string[] = []; // Empty list for new game
-              setCountries(getRandomCountries(totalRounds, excludeIds));
+              setUsedCountryIds([]);
+              setCountries(getRandomCountries(totalRounds, []));
               const jokersCount = getJokersCount(totalRounds);
               setJokers(new Array(numPlayers).fill(null).map(() => ({ hint: 0, freeze: 0, sabotage: 0 })));
               setInitialHints(new Array(numPlayers).fill(jokersCount));
