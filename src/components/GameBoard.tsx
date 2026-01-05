@@ -165,9 +165,17 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
     const nextRoundNum = currentRound + 1;
     
     // Check if we've reached the end of the game
+    // currentRound is 0-based: rounds are 0, 1, 2, ..., totalRounds-1
+    // If totalRounds = 10, we have rounds 0-9 (10 rounds total)
+    // When currentRound = 9 (last round), nextRoundNum = 10, which should end the game
+    console.log(`goToNextRound: currentRound=${currentRound}, nextRoundNum=${nextRoundNum}, totalRounds=${totalRounds}`);
+    
     if (nextRoundNum >= totalRounds) {
+      console.log("Game finished! Setting phase to finished");
       setPhase("finished");
       setIsTimerRunning(false);
+      setFeedback(null);
+      setHint(null);
       return;
     }
     
@@ -498,10 +506,16 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
         </div>
       );
     }
-    if (!currentCountry || currentRound >= countries.length) {
+    // Check if we've finished all rounds - use totalRounds instead of countries.length
+    if (currentRound >= totalRounds) {
+      // This should not happen if goToNextRound works correctly, but as a safety check
+      setPhase("finished");
+    }
+    
+    if (!currentCountry || (currentRound < totalRounds && currentRound >= countries.length)) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-xl text-destructive">Erreur : Pays introuvable (Round {currentRound + 1}/{countries.length})</div>
+          <div className="text-xl text-destructive">Erreur : Pays introuvable (Round {currentRound + 1}/{totalRounds}, Countries: {countries.length})</div>
         </div>
       );
     }
