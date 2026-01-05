@@ -306,6 +306,7 @@ export function MultiplayerGame({
           isWinner={false}
           jokersLeft={playerRole === "host" ? jokersLeft : undefined}
           isOnFire={playerOnFire === "host"}
+          isLeading={room.host_score > room.guest_score}
         />
         <PlayerCard
           playerNumber={2}
@@ -315,6 +316,7 @@ export function MultiplayerGame({
           isWinner={false}
           jokersLeft={playerRole === "guest" ? jokersLeft : undefined}
           isOnFire={playerOnFire === "guest"}
+          isLeading={room.guest_score > room.host_score}
         />
       </div>
 

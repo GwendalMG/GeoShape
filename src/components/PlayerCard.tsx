@@ -10,20 +10,22 @@ interface PlayerCardProps {
   jokersLeft?: number;
   bonusScore?: number;
   isOnFire?: boolean;
+  isLeading?: boolean;
 }
 
-export function PlayerCard({ playerNumber, name, score, isActive, isWinner, jokersLeft, bonusScore, isOnFire = false }: PlayerCardProps) {
+export function PlayerCard({ playerNumber, name, score, isActive, isWinner, jokersLeft, bonusScore, isOnFire = false, isLeading = false }: PlayerCardProps) {
   const isPlayerOne = playerNumber === 1;
   
   return (
     <div
       className={cn(
-        "relative p-2 md:p-4 rounded-lg md:rounded-xl border-2 transition-all duration-300 card-shadow",
+        "relative p-2 md:p-4 rounded-lg md:rounded-xl border-2 transition-all duration-300 card-shadow overflow-hidden",
         isActive && isPlayerOne && "border-player-one glow-player-one scale-[1.02] md:scale-105",
         isActive && !isPlayerOne && "border-player-two glow-player-two scale-[1.02] md:scale-105",
         !isActive && "border-border bg-card/50 opacity-60",
         isWinner && "animate-success-pop",
-        isOnFire && "animate-fire-effect border-orange-500"
+        isOnFire && "animate-fire-effect border-orange-500",
+        isLeading && "leading-border-glow"
       )}
       style={{
         background: isOnFire
@@ -41,12 +43,13 @@ export function PlayerCard({ playerNumber, name, score, isActive, isWinner, joke
       }}
     >
       {isWinner && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-bold">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-bold z-10">
           🏆 Gagnant !
         </div>
       )}
       
-      <div className="flex items-center gap-2 md:gap-3">
+      
+      <div className="relative z-10 flex items-center gap-2 md:gap-3">
         <div
           className={cn(
             "w-7 h-7 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-lg font-bold flex-shrink-0",
