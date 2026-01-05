@@ -246,6 +246,21 @@ export function getRandomCountries(count: number): Country[] {
   return selected.sort(() => Math.random() - 0.5).slice(0, count);
 }
 
+// Get a single random country excluding already used ones
+export function getRandomCountry(excludeIds: string[] = []): Country | null {
+  let availableCountries = countries.filter(c => !excludeIds.includes(c.id));
+  
+  // If all countries have been used, reset and allow all countries again
+  if (availableCountries.length === 0) {
+    availableCountries = countries;
+  }
+  
+  if (availableCountries.length === 0) return null;
+  
+  const randomIndex = Math.floor(Math.random() * availableCountries.length);
+  return availableCountries[randomIndex];
+}
+
 export function normalizeAnswer(answer: string): string {
   return answer
     .toLowerCase()
