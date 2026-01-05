@@ -34,6 +34,7 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [roundResults, setRoundResults] = useState<Array<{ winner: 1 | 2 | null }>>([]);
   const [roundStartPlayer, setRoundStartPlayer] = useState<1 | 2>(1); // Track who started the round
+  const [playerOnFire, setPlayerOnFire] = useState<1 | 2 | null>(null); // Track which player just scored
     
     // Jokers state
   const [jokers, setJokers] = useState({ player1: 0, player2: 0 });
@@ -79,6 +80,12 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
         [currentPlayer === 1 ? "player1" : "player2"]: prev[currentPlayer === 1 ? "player1" : "player2"] + 1
       }));
       setRoundResults((prev) => [...prev, { winner: currentPlayer }]);
+      
+      // Activate fire effect for the player who scored
+      setPlayerOnFire(currentPlayer);
+      setTimeout(() => {
+        setPlayerOnFire(null);
+      }, 2000); // Fire effect lasts 2 seconds
       
       // If it's a hard country, give +1 joker
       if (currentCountry.difficulty === 'DIFFICILE') {
@@ -268,6 +275,7 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
           score={scores.player1}
           isActive={currentPlayer === 1 && phase === "playing"}
           jokersLeft={jokers.player1}
+          isOnFire={playerOnFire === 1}
         />
         <PlayerCard
           playerNumber={2}
@@ -275,6 +283,7 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
           score={scores.player2}
           isActive={currentPlayer === 2 && phase === "playing"}
           jokersLeft={jokers.player2}
+          isOnFire={playerOnFire === 2}
         />
       </div>
       

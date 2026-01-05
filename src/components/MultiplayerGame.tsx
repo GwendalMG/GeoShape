@@ -45,6 +45,7 @@ export function MultiplayerGame({
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [revealedCountryName, setRevealedCountryName] = useState<string>("");
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [playerOnFire, setPlayerOnFire] = useState<"host" | "guest" | null>(null); // Track which player just scored
   
   // Jokers
   const [jokersLeft, setJokersLeft] = useState(0);
@@ -107,6 +108,12 @@ export function MultiplayerGame({
     setFeedback(result.correct ? "correct" : "incorrect");
     
     if (result.correct) {
+      // Activate fire effect for the player who scored
+      setPlayerOnFire(playerRole);
+      setTimeout(() => {
+        setPlayerOnFire(null);
+      }, 2000); // Fire effect lasts 2 seconds
+      
       // If it's a hard country, give +1 joker
       if (currentCountry && currentCountry.difficulty === 'DIFFICILE') {
         setJokersLeft(prev => prev + 1);
@@ -298,6 +305,7 @@ export function MultiplayerGame({
           isActive={room.current_turn === "host" && phase === "playing"}
           isWinner={false}
           jokersLeft={playerRole === "host" ? jokersLeft : undefined}
+          isOnFire={playerOnFire === "host"}
         />
         <PlayerCard
           playerNumber={2}
@@ -306,6 +314,7 @@ export function MultiplayerGame({
           isActive={room.current_turn === "guest" && phase === "playing"}
           isWinner={false}
           jokersLeft={playerRole === "guest" ? jokersLeft : undefined}
+          isOnFire={playerOnFire === "guest"}
         />
       </div>
 

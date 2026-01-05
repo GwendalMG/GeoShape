@@ -9,9 +9,10 @@ interface PlayerCardProps {
   isWinner?: boolean;
   jokersLeft?: number;
   bonusScore?: number;
+  isOnFire?: boolean;
 }
 
-export function PlayerCard({ playerNumber, name, score, isActive, isWinner, jokersLeft, bonusScore }: PlayerCardProps) {
+export function PlayerCard({ playerNumber, name, score, isActive, isWinner, jokersLeft, bonusScore, isOnFire = false }: PlayerCardProps) {
   const isPlayerOne = playerNumber === 1;
   
   return (
@@ -21,15 +22,22 @@ export function PlayerCard({ playerNumber, name, score, isActive, isWinner, joke
         isActive && isPlayerOne && "border-player-one glow-player-one scale-[1.02] md:scale-105",
         isActive && !isPlayerOne && "border-player-two glow-player-two scale-[1.02] md:scale-105",
         !isActive && "border-border bg-card/50 opacity-60",
-        isWinner && "animate-success-pop"
+        isWinner && "animate-success-pop",
+        isOnFire && "animate-fire-effect border-orange-500"
       )}
       style={{
-        background: isActive
+        background: isOnFire
+          ? undefined // Let CSS animation handle the fire background
+          : isActive
           ? isPlayerOne
             ? "linear-gradient(135deg, hsl(210 100% 50% / 0.15) 0%, hsl(200 100% 40% / 0.1) 100%)"
             : "linear-gradient(135deg, hsl(340 82% 55% / 0.15) 0%, hsl(320 80% 45% / 0.1) 100%)"
           : undefined,
-        animation: isActive ? "pulse-glow-slow 3s ease-in-out infinite" : undefined
+        animation: isOnFire 
+          ? "fire-effect 0.8s ease-in-out" 
+          : isActive 
+          ? "pulse-glow-slow 3s ease-in-out infinite" 
+          : undefined
       }}
     >
       {isWinner && (
