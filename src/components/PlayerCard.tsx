@@ -48,31 +48,16 @@ export function PlayerCard({ playerNumber, name, score, isActive, isWinner, joke
         </div>
       )}
       
-      {/* Leading border progress bar - similar to timer */}
+      {/* Leading border neon glow effect */}
       {isLeading && (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible" style={{ borderRadius: 'inherit' }}>
-          <defs>
-            <style>{`
-              .leading-border-path {
-                fill: none;
-                stroke: hsl(45 93% 58%);
-                stroke-width: 2;
-                stroke-linecap: round;
-                stroke-dasharray: 1000;
-                stroke-dashoffset: 1000;
-                animation: leading-border-fill 3s linear infinite;
-              }
-            `}</style>
-          </defs>
-          <rect
-            x="2"
-            y="2"
-            width="calc(100% - 4px)"
-            height="calc(100% - 4px)"
-            rx="0.5rem"
-            className="leading-border-path"
-          />
-        </svg>
+        <div 
+          className="absolute inset-0 pointer-events-none z-0 leading-neon-glow"
+          style={{
+            borderRadius: 'inherit',
+            '--player-color': isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)',
+            '--player-color-light': isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)',
+          } as React.CSSProperties}
+        />
       )}
       
       <div className="relative z-10 flex items-center gap-2 md:gap-3">

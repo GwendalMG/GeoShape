@@ -232,19 +232,37 @@
   transition: background 0.3s ease;
 }
 
-@keyframes leading-border-fill {
+@keyframes leading-neon {
   0% {
-    stroke-dashoffset: 1000;
+    transform: rotate(0deg);
   }
   100% {
-    stroke-dashoffset: 0;
+    transform: rotate(360deg);
   }
-}
-
-.animate-leading-border-fill {
-  animation: leading-border-fill 3s linear infinite;
 }
 
 .leading-border-glow {
   position: relative;
+}
+
+.leading-neon-glow {
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(var(--card) 0 0) padding-box,
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 170deg,
+      var(--player-color-light) 175deg,
+      var(--player-color) 180deg,
+      var(--player-color-light) 185deg,
+      transparent 190deg,
+      transparent 350deg,
+      var(--player-color-light) 355deg,
+      var(--player-color) 360deg,
+      var(--player-color-light) 5deg,
+      transparent 10deg
+    ) border-box;
+  animation: leading-neon 3s linear infinite;
+  opacity: 0.8;
 }
