@@ -232,40 +232,19 @@
   transition: background 0.3s ease;
 }
 
-@keyframes leading-border {
+@keyframes leading-border-fill {
   0% {
-    transform: rotate(0deg);
+    stroke-dashoffset: 1000;
   }
   100% {
-    transform: rotate(360deg);
+    stroke-dashoffset: 0;
   }
 }
 
-.animate-leading-border {
-  animation: leading-border 2s linear infinite;
+.animate-leading-border-fill {
+  animation: leading-border-fill 3s linear infinite;
 }
 
-.leading-border-glow::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  padding: 2px;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 270deg,
-    hsl(45 93% 58% / 0.8) 285deg,
-    hsl(45 93% 58%) 300deg,
-    hsl(45 93% 58% / 0.8) 315deg,
-    transparent 330deg,
-    transparent 360deg
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: xor;
-  animation: leading-border 2s linear infinite;
-  pointer-events: none;
-  z-index: 0;
+.leading-border-glow {
+  position: relative;
 }

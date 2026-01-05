@@ -48,6 +48,28 @@ export function PlayerCard({ playerNumber, name, score, isActive, isWinner, joke
         </div>
       )}
       
+      {/* Leading border progress bar - similar to timer */}
+      {isLeading && (
+        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ borderRadius: 'inherit' }}>
+          <rect
+            x="2"
+            y="2"
+            width="calc(100% - 4px)"
+            height="calc(100% - 4px)"
+            rx="0.5rem"
+            fill="none"
+            stroke="hsl(45 93% 58%)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="1000"
+            strokeDashoffset="0"
+            className="animate-leading-border-fill"
+            style={{
+              pathLength: 1000,
+            }}
+          />
+        </svg>
+      )}
       
       <div className="relative z-10 flex items-center gap-2 md:gap-3">
         <div
