@@ -305,20 +305,32 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
       
       // No fire effect - removed as per UX requirements
       
-      // If it's a DIFFICILE country, give random joker (33.33% each: FREEZE, SABOTAGE, HINT)
+      // If it's a DIFFICILE country, give joker
       if (currentCountry.difficulty === 'DIFFICILE') {
-        const randomJoker = getRandomJoker();
-        setJokers((prev) => {
-          const newJokers = [...prev];
-          if (randomJoker === 'FREEZE') {
-            newJokers[currentPlayerIndex] = { ...newJokers[currentPlayerIndex], freeze: newJokers[currentPlayerIndex].freeze + 1 };
-          } else if (randomJoker === 'SABOTAGE') {
-            newJokers[currentPlayerIndex] = { ...newJokers[currentPlayerIndex], sabotage: newJokers[currentPlayerIndex].sabotage + 1 };
-          } else {
+        const isSolo = numPlayers === 1;
+        
+        if (isSolo) {
+          // Solo mode: always give HINT joker (100%)
+          setJokers((prev) => {
+            const newJokers = [...prev];
             newJokers[currentPlayerIndex] = { ...newJokers[currentPlayerIndex], hint: newJokers[currentPlayerIndex].hint + 1 };
-          }
-          return newJokers;
-        });
+            return newJokers;
+          });
+        } else {
+          // Multiplayer mode: random joker (33.33% each: FREEZE, SABOTAGE, HINT)
+          const randomJoker = getRandomJoker();
+          setJokers((prev) => {
+            const newJokers = [...prev];
+            if (randomJoker === 'FREEZE') {
+              newJokers[currentPlayerIndex] = { ...newJokers[currentPlayerIndex], freeze: newJokers[currentPlayerIndex].freeze + 1 };
+            } else if (randomJoker === 'SABOTAGE') {
+              newJokers[currentPlayerIndex] = { ...newJokers[currentPlayerIndex], sabotage: newJokers[currentPlayerIndex].sabotage + 1 };
+            } else {
+              newJokers[currentPlayerIndex] = { ...newJokers[currentPlayerIndex], hint: newJokers[currentPlayerIndex].hint + 1 };
+            }
+            return newJokers;
+          });
+        }
         // No message - just update the counter silently
       }
       
@@ -486,7 +498,16 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
         <div className="text-center mb-6 md:mb-10">
           <Trophy className="w-16 h-16 md:w-20 md:h-20 text-primary mx-auto mb-4 md:mb-6 animate-float" />
           <h1 className="text-2xl md:text-4xl font-black mb-4">
-            {isTie ? (
+            {numPlayers === 1 ? (
+              // Solo mode: show performance message
+              <>
+                <span className="text-foreground">Partie terminée !</span>
+                <br />
+                <span className="text-gradient-gold">
+                  Score final : {scores[0]}/{attemptsPerPlayer[0] || 1}
+                </span>
+              </>
+            ) : isTie ? (
               <span className="text-gradient-gold">Égalité !</span>
             ) : (
               <>
@@ -714,7 +735,8 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
                 Indice ({((initialHints && initialHints[currentPlayerIndex]) || 0) + (jokers[currentPlayerIndex]?.hint || 0)})
               </Button>
             )}
-            {jokers[currentPlayerIndex] && jokers[currentPlayerIndex].freeze > 0 && (
+            {/* Freeze and Sabotage jokers only available in multiplayer mode */}
+            {numPlayers > 1 && jokers[currentPlayerIndex] && jokers[currentPlayerIndex].freeze > 0 && (
               <Button
                 onClick={useFreezeJoker}
                 variant="outline"
@@ -726,7 +748,7 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
                 Freeze ({jokers[currentPlayerIndex].freeze})
               </Button>
             )}
-            {jokers[currentPlayerIndex] && jokers[currentPlayerIndex].sabotage > 0 && (
+            {numPlayers > 1 && jokers[currentPlayerIndex] && jokers[currentPlayerIndex].sabotage > 0 && (
               <Button
                 onClick={useSabotageJoker}
                 variant="outline"

@@ -46,7 +46,7 @@ const countryNames: Record<string, { name: string; nameFr: string; funFact: stri
   MK: { name: "North Macedonia", nameFr: "Macédoine du Nord", capital: "Skopje", funFact: "Ce territoire enclavé tire son nom d'une région historique antique.", difficulty: "FACILE" },
   SI: { name: "Slovenia", nameFr: "Slovénie", capital: "Ljubljana", funFact: "Malgré sa petite taille, ce territoire possède à la fois des Alpes et un accès à l'Adriatique.", difficulty: "FACILE" },
   BA: { name: "Bosnia and Herzegovina", nameFr: "Bosnie-Herzégovine", capital: "Sarajevo", funFact: "Ce territoire présente une forme presque triangulaire avec un minuscule corridor vers la mer." , difficulty: "DIFFICILE" },
-  ME: { name: "Montenegro", nameFr: "Monténégro", capital: "Podgorica", funFact: "Son nom signifie \"montagne noire\", reflétant son relief très accidenté.", difficulty: "DIFFICILE" },
+  ME: { name: "Montenegro", nameFr: "Monténégro", capital: "Podgorica", funFact: "Son nom signifie \"montagne noire\", reflétant son relief très accidenté.", difficulty: "FACILE" },
   MD: { name: "Moldova", nameFr: "Moldavie", capital: "Chișinău", funFact: "Enclavé entre deux grands voisins, ce territoire est traversé par un affluent majeur.", difficulty: "FACILE" },
   
   // Asie
@@ -114,7 +114,7 @@ const countryNames: Record<string, { name: string; nameFr: string; funFact: stri
   
   // Afrique
   EG: { name: "Egypt", nameFr: "Égypte", capital: "Le Caire", funFact: "Ce territoire désertique est traversé par le plus long fleuve du monde." , difficulty: "FACILE" },
-  ZA: { name: "South Africa", nameFr: "Afrique du Sud", capital: "Pretoria", funFact: "Ce territoire possède trois capitales et entoure complètement un petit royaume montagneux." , difficulty: "FACILE" },
+  ZA: { name: "South Africa", nameFr: "Afrique du Sud", capital: "Pretoria", funFact: "Ce territoire possède trois capitales et entoure complètement un petit royaume montagneux." , difficulty: "TRES_FACILE" },
   MA: { name: "Morocco", nameFr: "Maroc", capital: "Rabat", funFact: "La pointe nord-ouest de l'Afrique se trouve à seulement 14 km de l'Europe." , difficulty: "TRES_FACILE" },
   DZ: { name: "Algeria", nameFr: "Algérie", capital: "Alger", funFact: "Le plus grand pays d'Afrique est couvert à 90% par le Sahara." , difficulty: "TRES_FACILE" },
   TN: { name: "Tunisia", nameFr: "Tunisie", capital: "Tunis", funFact: "Le point le plus septentrional d'Afrique se trouve dans ce territoire méditerranéen." , difficulty: "FACILE" },
@@ -131,7 +131,7 @@ const countryNames: Record<string, { name: string; nameFr: string; funFact: stri
   AO: { name: "Angola", nameFr: "Angola", capital: "Luanda", funFact: "Ce territoire possède une enclave séparée du territoire principal par un corridor." , difficulty: "FACILE" },
   MZ: { name: "Mozambique", nameFr: "Mozambique", capital: "Maputo", funFact: "Ce territoire s'étire sur plus de 2 500 km le long de l'océan Indien." , difficulty: "DIFFICILE" },
   ZW: { name: "Zimbabwe", nameFr: "Zimbabwe", capital: "Harare", funFact: "Ce territoire enclavé abrite les spectaculaires chutes Victoria sur sa frontière." , difficulty: "DIFFICILE" },
-  BW: { name: "Botswana", nameFr: "Botswana", capital: "Gaborone", funFact: "Territoire enclavé dont 70% est couvert par le désert du Kalahari." , difficulty: "FACILE" },
+  BW: { name: "Botswana", nameFr: "Botswana", capital: "Gaborone", funFact: "Territoire enclavé dont 70% est couvert par le désert du Kalahari." , difficulty: "DIFFICILE" },
   NA: { name: "Namibia", nameFr: "Namibie", capital: "Windhoek", funFact: "Ce territoire désertique possède le plus ancien désert du monde sur sa côte." , difficulty: "FACILE" },
   ZM: { name: "Zambia", nameFr: "Zambie", capital: "Lusaka", funFact: "Sans accès à la mer, ce territoire en forme de papillon possède le plus grand barrage d'Afrique." , difficulty: "DIFFICILE" },
   RW: { name: "Rwanda", nameFr: "Rwanda", capital: "Kigali", funFact: "Surnommé le pays aux mille collines, c'est l'un des plus petits territoires d'Afrique continentale.", difficulty: "DIFFICILE" },
@@ -152,16 +152,16 @@ const countryNames: Record<string, { name: string; nameFr: string; funFact: stri
   MR: { name: "Mauritania", nameFr: "Mauritanie", capital: "Nouakchott", funFact: "Trois quarts de ce territoire sont couverts par le Sahara occidental." , difficulty: "FACILE" },
   GN: { name: "Guinea", nameFr: "Guinée", capital: "Conakry", funFact: "Surnommée le château d'eau de l'Afrique, plusieurs grands fleuves y prennent leur source." , difficulty: "FACILE" },
   SL: { name: "Sierra Leone", nameFr: "Sierra Leone", capital: "Freetown", funFact: "Ce petit territoire côtier doit son nom à la forme de ses montagnes." , difficulty: "FACILE" },
-  LR: { name: "Liberia", nameFr: "Liberia", capital: "Monrovia", funFact: "Seul pays africain fondé par d'anciens esclaves américains, bordant l'Atlantique." , difficulty: "FACILE" },
+  LR: { name: "Liberia", nameFr: "Liberia", capital: "Monrovia", funFact: "Seul pays africain fondé par d'anciens esclaves américains, bordant l'Atlantique." , difficulty: "DIFFICILE" },
   SS: { name: "South Sudan", nameFr: "Soudan du Sud", capital: "Djouba", funFact: "Le plus jeune pays du monde (2011) est enclavé au cœur de l'Afrique." , difficulty: "DIFFICILE" },
   ER: { name: "Eritrea", nameFr: "Érythrée", capital: "Asmara", funFact: "Ce territoire possède plus de 350 îles dans la mer Rouge." , difficulty: "FACILE" },
-  DJ: { name: "Djibouti", nameFr: "Djibouti", capital: "Djibouti", funFact: "Petit territoire stratégique où trois plaques tectoniques se rencontrent.", difficulty: "FACILE" },
+  DJ: { name: "Djibouti", nameFr: "Djibouti", capital: "Djibouti", funFact: "Petit territoire stratégique où trois plaques tectoniques se rencontrent.", difficulty: "DIFFICILE" },
   
   // Russie
   RU: { name: "Russia", nameFr: "Russie", capital: "Moscou", funFact: "Le plus vaste pays du monde s'étend sur deux continents et traverse 11 fuseaux horaires." , difficulty: "TRES_FACILE" },
   GE: { name: "Georgia", nameFr: "Géorgie", capital: "Tbilissi", funFact: "Le Caucase traverse ce territoire situé à la frontière entre Europe et Asie." , difficulty: "FACILE" },
   AM: { name: "Armenia", nameFr: "Arménie", capital: "Erevan", funFact: "Ce territoire montagneux et enclavé abrite le mont biblique légendaire.", difficulty: "FACILE" },
-  AZ: { name: "Azerbaijan", nameFr: "Azerbaïdjan", capital: "Bakou", funFact: "Bordant la mer Caspienne, ce territoire possède une exclave séparée du territoire principal." , difficulty: "FACILE" },
+  AZ: { name: "Azerbaijan", nameFr: "Azerbaïdjan", capital: "Bakou", funFact: "Bordant la mer Caspienne, ce territoire possède une exclave séparée du territoire principal." , difficulty: "DIFFICILE" },
 };
 
 // Get the shape data from the package
