@@ -232,19 +232,3 @@
   transition: background 0.3s ease;
 }
 
-@keyframes leading-border-fill {
-  0% {
-    stroke-dashoffset: 1000;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-.animate-leading-border-fill {
-  animation: leading-border-fill 3s linear infinite;
-}
-
-.leading-border-glow {
-  position: relative;
-}
