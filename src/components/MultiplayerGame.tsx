@@ -4,7 +4,7 @@ import { CountrySilhouette } from "@/components/CountrySilhouette";
 import { PlayerCard } from "@/components/PlayerCard";
 import { AnswerInput } from "@/components/AnswerInput";
 import { Timer } from "@/components/Timer";
-import { RotateCcw, Trophy, Crown, Wifi, Lightbulb, MapPin } from "lucide-react";
+import { RotateCcw, Trophy, Crown, Wifi, Lightbulb } from "lucide-react";
 import { countries } from "@/data/countries";
 import { GameRoom } from "@/hooks/useMultiplayerRoom";
 import { cn } from "@/lib/utils";
@@ -331,19 +331,9 @@ export function MultiplayerGame({
         </div>
       </div>
 
-      {/* Capital and Fun Fact - shown during playing phase */}
+      {/* Fun Fact - shown during playing phase */}
       {phase === "playing" && currentCountry && (
-        <div className="mb-1 animate-fade-in space-y-1 flex-shrink-0">
-          {/* Capital Badge - Compact */}
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm border-2 border-primary/40 rounded-lg px-3 py-1.5 animate-pulse-glow">
-              <MapPin className="w-4 h-4 text-primary" />
-              <span className="font-bold text-xs md:text-sm text-primary">
-                Capitale : <span className="text-foreground">{currentCountry.capital}</span>
-              </span>
-            </div>
-          </div>
-          
+        <div className="mb-1 animate-fade-in flex-shrink-0">
           {/* Fun Fact Card - Compact */}
           <div className="bg-card/90 backdrop-blur-sm rounded-lg p-2 md:p-3 border-2 border-primary/20 max-w-2xl mx-auto shadow-lg">
             <div className="flex items-start gap-2">
