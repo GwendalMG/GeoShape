@@ -162,26 +162,31 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
       });
     }
     
-    if (currentRound + 1 >= totalRounds) {
+    const nextRoundNum = currentRound + 1;
+    
+    // Check if we've reached the end of the game
+    if (nextRoundNum >= totalRounds) {
       setPhase("finished");
-    } else {
-      const nextRoundNum = currentRound + 1;
-      setCurrentRound(nextRoundNum);
-      
-      // Determine next starting player: alternate based on round number
-      let nextStartPlayerIndex = nextRoundNum % numPlayers;
-      
-      // Reset frozen state for new round
-      setFrozenPlayerIndex(null);
-      
-      setCurrentPlayerIndex(nextStartPlayerIndex);
-      setRoundStartPlayerIndex(nextStartPlayerIndex);
-      setAttemptsThisRound(0);
-      setPhase("playing");
-      setIsTimerRunning(true);
-      setFeedback(null);
-      setHint(null);
+      setIsTimerRunning(false);
+      return;
     }
+    
+    // Continue to next round
+    setCurrentRound(nextRoundNum);
+    
+    // Determine next starting player: alternate based on round number
+    let nextStartPlayerIndex = nextRoundNum % numPlayers;
+    
+    // Reset frozen state for new round
+    setFrozenPlayerIndex(null);
+    
+    setCurrentPlayerIndex(nextStartPlayerIndex);
+    setRoundStartPlayerIndex(nextStartPlayerIndex);
+    setAttemptsThisRound(0);
+    setPhase("playing");
+    setIsTimerRunning(true);
+    setFeedback(null);
+    setHint(null);
   }, [currentRound, totalRounds, numPlayers, currentCountry]);
   
   const useHintJoker = useCallback(() => {
