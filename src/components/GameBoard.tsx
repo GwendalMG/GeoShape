@@ -333,11 +333,13 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
       setFeedback("wrong");
       
       // Calculate points penalty based on difficulty
+      // ONLY TRES_FACILE incurs penalty (-1 point)
+      // FACILE and DIFFICILE have NO penalty (0 point)
       let pointsToSubtract = 0;
-      if (currentCountry.difficulty === 'TRES_FACILE' || currentCountry.difficulty === 'FACILE') {
+      if (currentCountry.difficulty === 'TRES_FACILE') {
         pointsToSubtract = 1;
-      } else if (currentCountry.difficulty === 'DIFFICILE') {
-        pointsToSubtract = 0; // No penalty for DIFFICILE
+      } else if (currentCountry.difficulty === 'FACILE' || currentCountry.difficulty === 'DIFFICILE') {
+        pointsToSubtract = 0; // No penalty for FACILE or DIFFICILE
       }
       
       if (pointsToSubtract > 0) {

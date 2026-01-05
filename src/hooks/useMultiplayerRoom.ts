@@ -300,6 +300,17 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         updates.guest_score = room.guest_score + 1;
       }
     } else {
+      // If wrong, apply penalty based on difficulty
+      // ONLY TRES_FACILE incurs penalty (-1 point)
+      // FACILE and DIFFICILE have NO penalty (0 point)
+      if (currentCountry.difficulty === 'TRES_FACILE') {
+        if (playerRole === "host") {
+          updates.host_score = Math.max(0, room.host_score - 1);
+        } else {
+          updates.guest_score = Math.max(0, room.guest_score - 1);
+        }
+      }
+      // FACILE and DIFFICILE: no penalty (score stays the same)
       // If wrong, switch turn to let the other player try
       // This allows the other player to try the same country
       const nextTurn = room.current_turn === "host" ? "guest" : "host";
@@ -328,7 +339,22 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
   }, [room, playerRole]);
 
   const handleTimeUp = useCallback(async () => {
-    if (!room) return;
+    if (!room || room.current_country_index === null) return;
+
+    // Apply penalty based on difficulty when time is up
+    // ONLY TRES_FACILE incurs penalty (-1 point)
+    // FACILE and DIFFICILE have NO penalty (0 point)
+    const currentCountry = countries[room.current_country_index];
+    const updates: Partial<GameRoom> = {};
+    
+    if (currentCountry.difficulty === 'TRES_FACILE') {
+      if (room.current_turn === "host") {
+        updates.host_score = Math.max(0, room.host_score - 1);
+      } else {
+        updates.guest_score = Math.max(0, room.guest_score - 1);
+      }
+    }
+    // FACILE and DIFFICILE: no penalty (score stays the same)
 
     // Switch turn immediately when time is up
     const nextTurn = room.current_turn === "host" ? "guest" : "host";
@@ -337,9 +363,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     // Rounds always start with host, so:
     // - If host's time is up → switch to guest (guest can try)
     // - If guest's time is up → switch back to host (both have tried, end round)
-    const updates: Partial<GameRoom> = {
-      current_turn: nextTurn, // Switch turn immediately
-    };
+    updates.current_turn = nextTurn; // Switch turn immediately
 
     // Check if both players have tried
     // Round 1 starts with host, round 2 with guest, etc.
