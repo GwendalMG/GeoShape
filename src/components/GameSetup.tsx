@@ -69,11 +69,6 @@ export function GameSetup({ onStart, onMultiplayer }: GameSetupProps) {
             ))}
           </div>
           
-          <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-            <Users className="w-5 h-5" />
-            <span className="text-sm uppercase tracking-wider font-medium">Joueurs</span>
-          </div>
-          
           <div className="space-y-4 mb-8">
             {Array.from({ length: numPlayers }).map((_, index) => {
               const color = PLAYER_COLORS[index];
@@ -134,7 +129,7 @@ export function GameSetup({ onStart, onMultiplayer }: GameSetupProps) {
               className="w-full py-6 text-xl font-bold rounded-xl border-2 mt-4 transition-all duration-200 hover:scale-105 active:scale-95 hover:border-primary/50"
             >
               <Wifi className="w-6 h-6 mr-3" />
-              Mode multijoueur en ligne (2-4 joueurs)
+              Mode en ligne
             </Button>
           )}
         </div>
