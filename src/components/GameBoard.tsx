@@ -276,7 +276,6 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
           isActive={currentPlayer === 1 && phase === "playing"}
           jokersLeft={jokers.player1}
           isOnFire={playerOnFire === 1}
-          isLeading={scores.player1 > scores.player2}
         />
         <PlayerCard
           playerNumber={2}
@@ -285,7 +284,6 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
           isActive={currentPlayer === 2 && phase === "playing"}
           jokersLeft={jokers.player2}
           isOnFire={playerOnFire === 2}
-          isLeading={scores.player2 > scores.player1}
         />
       </div>
       
