@@ -33,8 +33,6 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [roundResults, setRoundResults] = useState<Array<{ winner: 1 | 2 | null }>>([]);
-  const [roundStartPlayer, setRoundStartPlayer] = useState<1 | 2>(1); // Track who started the round
-  const [attemptsThisRound, setAttemptsThisRound] = useState(0); // Track number of attempts this round
   
   // Jokers state
   const [jokers, setJokers] = useState({ player1: 0, player2: 0 });
@@ -44,10 +42,8 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
     setCountries(getRandomCountries(totalRounds));
     const jokersCount = getJokersCount(totalRounds);
     setJokers({ player1: jokersCount, player2: jokersCount });
-    setAttemptsThisRound(0); // Reset attempts when starting new game
     // Round 0 always starts with player 1
     setCurrentPlayer(1);
-    setRoundStartPlayer(1);
   }, [totalRounds]);
   
   const currentCountry = countries[currentRound];
@@ -81,88 +77,52 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
         [currentPlayer === 1 ? "player1" : "player2"]: prev[currentPlayer === 1 ? "player1" : "player2"] + 1
       }));
       setRoundResults((prev) => [...prev, { winner: currentPlayer }]);
-      setAttemptsThisRound(0); // Reset attempts when someone finds it
       
       setTimeout(() => {
         setPhase("revealed");
         setTimeout(() => {
-          // If correct, go to next round (new country) and alternate starting player
           goToNextRound();
         }, 3000); // 3 seconds to see the answer
       }, 1000);
     } else {
       setFeedback("wrong");
       
-      // Calculate new attempts count
-      const newAttempts = attemptsThisRound + 1;
-      setAttemptsThisRound(newAttempts);
-      
       setTimeout(() => {
         setFeedback(null);
         setHint(null);
-        // Always switch to the other player when wrong
-        // This allows the other player to try the same country
         if (currentPlayer === 1) {
           setCurrentPlayer(2);
           setIsTimerRunning(true);
-          setPhase("playing");
         } else {
-          // Player 2 failed, check if both players have tried (2 attempts = both tried)
-          if (newAttempts >= 2) {
-            // Both players have tried and both failed
-            // Reveal the country and then move to next round
-            setRoundResults((prev) => [...prev, { winner: null }]);
-            setPhase("revealed");
-            setTimeout(() => {
-              goToNextRound();
-            }, 3000); // 3 seconds to see the answer
-          } else {
-            // Player 1 can try again (shouldn't happen normally)
-            setCurrentPlayer(1);
-            setIsTimerRunning(true);
-            setPhase("playing");
-          }
+          setRoundResults((prev) => [...prev, { winner: null }]);
+          setPhase("revealed");
+          setTimeout(() => {
+            goToNextRound();
+          }, 3000); // 3 seconds to see the answer
         }
       }, 1000);
     }
-  }, [currentCountry, currentPlayer, phase, attemptsThisRound]);
+  }, [currentCountry, currentPlayer, phase]);
   
   
   const handleTimeUp = useCallback(() => {
     setFeedback("wrong");
     setHint(null);
     
-    // Calculate new attempts count
-    const newAttempts = attemptsThisRound + 1;
-    setAttemptsThisRound(newAttempts);
-    
     setTimeout(() => {
       setFeedback(null);
-      // Always switch to the other player when time is up
-      // This allows the other player to try the same country
       if (currentPlayer === 1) {
         setCurrentPlayer(2);
         setIsTimerRunning(true);
-        setPhase("playing");
       } else {
-        // Player 2's time is up, check if both players have tried (2 attempts = both tried)
-        if (newAttempts >= 2) {
-          // Both players have tried and both failed
-          // Reveal the country and then move to next round
-          setRoundResults((prev) => [...prev, { winner: null }]);
-          setPhase("revealed");
-          setTimeout(() => {
-            goToNextRound();
-          }, 3000); // 3 seconds to see the answer
-        } else {
-          // Player 1 can try again (shouldn't happen normally)
-          setCurrentPlayer(1);
-          setIsTimerRunning(true);
-          setPhase("playing");
-        }
+        setRoundResults((prev) => [...prev, { winner: null }]);
+        setPhase("revealed");
+        setTimeout(() => {
+          goToNextRound();
+        }, 3000); // 3 seconds to see the answer
       }
     }, 1000);
-  }, [currentPlayer, attemptsThisRound]);
+  }, [currentPlayer]);
   
   const goToNextRound = () => {
     if (currentRound + 1 >= totalRounds) {
@@ -171,13 +131,10 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
       const nextRoundNum = currentRound + 1;
       setCurrentRound(nextRoundNum);
       // Alternate starting player each round strictly based on round number
-      // Round 0 (first round) starts with player 1, round 1 with player 2, round 2 with player 1, etc.
-      // This ensures strict alternation regardless of who found the country
       // Round 0 = Player 1, Round 1 = Player 2, Round 2 = Player 1, etc.
+      // This ensures strict alternation regardless of who found the country or who failed
       const nextStartPlayer: 1 | 2 = nextRoundNum % 2 === 0 ? 1 : 2;
       setCurrentPlayer(nextStartPlayer);
-      setRoundStartPlayer(nextStartPlayer);
-      setAttemptsThisRound(0); // Reset attempts counter for new round
       setPhase("playing");
       setIsTimerRunning(true);
       setFeedback(null);
@@ -346,18 +303,18 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
         </div>
       )}
       
-      {/* Answer Input - shown in both playing and revealed phases to display feedback */}
-      {(phase === "playing" || phase === "revealed") && (
+      {/* Answer Input */}
+      {phase === "playing" && (
         <div className="space-y-2 flex-shrink-0">
           <AnswerInput
             onSubmit={handleAnswer}
-            disabled={phase === "revealed" || !isTimerRunning}
+            disabled={!isTimerRunning}
             playerNumber={currentPlayer}
             feedback={feedback}
           />
           
-          {/* Joker Button - only shown during playing phase */}
-          {phase === "playing" && jokers[currentPlayer === 1 ? "player1" : "player2"] > 0 && !hint && (
+          {/* Joker Button */}
+          {jokers[currentPlayer === 1 ? "player1" : "player2"] > 0 && !hint && (
             <div className="text-center">
               <Button
                 onClick={useJoker}
@@ -370,6 +327,15 @@ export function GameBoard({ player1Name, player2Name, totalRounds, onRestart }: 
               </Button>
             </div>
           )}
+        </div>
+      )}
+      
+      {/* Revealed - just show the country name */}
+      {phase === "revealed" && (
+        <div className="text-center animate-fade-in flex-shrink-0">
+          <p className="text-lg md:text-xl font-bold text-success">
+            C'était : {currentCountry.nameFr}
+          </p>
         </div>
       )}
     </div>
