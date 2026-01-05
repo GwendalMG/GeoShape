@@ -48,21 +48,18 @@ export function PlayerCard({ playerNumber, name, score, isActive, isWinner, joke
         </div>
       )}
       
-      {/* Leading border neon glow effect - like timer progress bar */}
+      {/* Leading border neon glow effect - single light spot following the contour */}
       {isLeading && (
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ borderRadius: 'inherit', overflow: 'visible' }}>
           <defs>
             <linearGradient id={`leading-gradient-${playerNumber}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
-              <stop offset="5%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
-              <stop offset="10%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="1" />
-              <stop offset="15%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
-              <stop offset="20%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
-              <stop offset="80%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
-              <stop offset="85%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
-              <stop offset="90%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="1" />
-              <stop offset="95%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
-              <stop offset="100%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
+              <stop offset="0%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="0" />
+              <stop offset="45%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="0" />
+              <stop offset="50%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
+              <stop offset="55%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="1" />
+              <stop offset="60%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
+              <stop offset="65%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="0" />
+              <stop offset="100%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="0" />
             </linearGradient>
           </defs>
           <rect
@@ -79,7 +76,7 @@ export function PlayerCard({ playerNumber, name, score, isActive, isWinner, joke
             strokeDashoffset="1000"
             className="animate-leading-border-fill"
             style={{
-              filter: 'drop-shadow(0 0 4px ' + (isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)') + ')',
+              filter: 'drop-shadow(0 0 6px ' + (isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)') + ')',
             }}
           />
         </svg>
