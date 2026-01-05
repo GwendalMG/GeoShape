@@ -59,9 +59,16 @@
     @apply border-border;
   }
 
+  html {
+    background: var(--gradient-ocean);
+    background-attachment: fixed;
+    min-height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground font-outfit antialiased;
     background: var(--gradient-ocean);
+    background-attachment: fixed;
     min-height: 100vh;
   }
 }
