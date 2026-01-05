@@ -151,7 +151,7 @@ const countryNames: Record<string, { name: string; nameFr: string; funFact: stri
   TG: { name: "Togo", nameFr: "Togo", capital: "Lomé", funFact: "L'un des plus petits pays d'Afrique, très étroit, coincé entre deux voisins plus grands.", difficulty: "DIFFICILE" },
   MR: { name: "Mauritania", nameFr: "Mauritanie", capital: "Nouakchott", funFact: "Trois quarts de ce territoire sont couverts par le Sahara occidental." , difficulty: "FACILE" },
   GN: { name: "Guinea", nameFr: "Guinée", capital: "Conakry", funFact: "Surnommée le château d'eau de l'Afrique, plusieurs grands fleuves y prennent leur source." , difficulty: "FACILE" },
-  SL: { name: "Sierra Leone", nameFr: "Sierra Leone", capital: "Freetown", funFact: "Ce petit territoire côtier doit son nom à la forme de ses montagnes." , difficulty: "FACILE" },
+  SL: { name: "Sierra Leone", nameFr: "Sierra Leone", capital: "Freetown", funFact: "Ce petit territoire côtier doit son nom à la forme de ses montagnes." , difficulty: "DIFFICILE" },
   LR: { name: "Liberia", nameFr: "Liberia", capital: "Monrovia", funFact: "Seul pays africain fondé par d'anciens esclaves américains, bordant l'Atlantique." , difficulty: "DIFFICILE" },
   SS: { name: "South Sudan", nameFr: "Soudan du Sud", capital: "Djouba", funFact: "Le plus jeune pays du monde (2011) est enclavé au cœur de l'Afrique." , difficulty: "DIFFICILE" },
   ER: { name: "Eritrea", nameFr: "Érythrée", capital: "Asmara", funFact: "Ce territoire possède plus de 350 îles dans la mer Rouge." , difficulty: "FACILE" },
