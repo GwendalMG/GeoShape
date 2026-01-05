@@ -48,16 +48,41 @@ export function PlayerCard({ playerNumber, name, score, isActive, isWinner, joke
         </div>
       )}
       
-      {/* Leading border neon glow effect */}
+      {/* Leading border neon glow effect - like timer progress bar */}
       {isLeading && (
-        <div 
-          className="absolute inset-0 pointer-events-none z-0 leading-neon-glow"
-          style={{
-            borderRadius: 'inherit',
-            '--player-color': isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)',
-            '--player-color-light': isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)',
-          } as React.CSSProperties}
-        />
+        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ borderRadius: 'inherit', overflow: 'visible' }}>
+          <defs>
+            <linearGradient id={`leading-gradient-${playerNumber}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
+              <stop offset="5%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
+              <stop offset="10%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="1" />
+              <stop offset="15%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
+              <stop offset="20%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
+              <stop offset="80%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
+              <stop offset="85%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
+              <stop offset="90%" stopColor={isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)'} stopOpacity="1" />
+              <stop offset="95%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="1" />
+              <stop offset="100%" stopColor={isPlayerOne ? 'hsl(210 100% 75%)' : 'hsl(340 82% 75%)'} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <rect
+            x="2"
+            y="2"
+            width="calc(100% - 4px)"
+            height="calc(100% - 4px)"
+            rx="0.5rem"
+            fill="none"
+            stroke={`url(#leading-gradient-${playerNumber})`}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="1000"
+            strokeDashoffset="1000"
+            className="animate-leading-border-fill"
+            style={{
+              filter: 'drop-shadow(0 0 4px ' + (isPlayerOne ? 'hsl(210 100% 60%)' : 'hsl(340 82% 60%)') + ')',
+            }}
+          />
+        </svg>
       )}
       
       <div className="relative z-10 flex items-center gap-2 md:gap-3">
