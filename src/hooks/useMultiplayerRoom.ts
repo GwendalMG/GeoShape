@@ -371,10 +371,11 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         .update({ status: "finished" })
         .eq("id", room.id);
     } else {
-      // Alternate starting player each round
-      // Round 1 starts with host, round 2 with guest, round 3 with host, etc.
-      // This ensures strict alternation regardless of who found the country
-      const nextTurn: "host" | "guest" = nextRoundNum % 2 === 1 ? "host" : "guest";
+      // Alternate starting player based on who started the previous round
+      // If previous round started with host, next round starts with guest, and vice versa
+      // This ensures strict alternation regardless of who found the country or who failed
+      const previousRoundStart = room.round_start_turn || (room.current_round % 2 === 1 ? "host" : "guest");
+      const nextTurn: "host" | "guest" = previousRoundStart === "host" ? "guest" : "host";
       
       // Build update payload - try to include round_start_turn
       const updatePayload: any = {
