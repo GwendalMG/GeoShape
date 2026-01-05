@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GameSetup } from "@/components/GameSetup";
 import { GameBoard } from "@/components/GameBoard";
 import { MultiplayerLobby } from "@/components/MultiplayerLobby";
@@ -6,8 +6,7 @@ import { MultiplayerGame } from "@/components/MultiplayerGame";
 import { useMultiplayerRoom } from "@/hooks/useMultiplayerRoom";
 
 interface GameConfig {
-  player1Name: string;
-  player2Name: string;
+  players: string[];
   totalRounds: number;
 }
 
@@ -32,16 +31,17 @@ const Index = () => {
   } = useMultiplayerRoom();
 
   // Handle room state changes
-  if (room && gameMode === "multiplayer-lobby") {
-    if (room.status === "playing" || room.status === "finished" || room.guest_name) {
-      setGameMode("multiplayer-game");
+  useEffect(() => {
+    if (room && gameMode === "multiplayer-lobby") {
+      if (room.status === "playing" || room.status === "finished" || room.guest_name) {
+        setGameMode("multiplayer-game");
+      }
     }
-  }
+  }, [room, gameMode]);
 
-  const handleStart = (player1Name: string, player2Name: string, rounds: number) => {
+  const handleStart = (players: string[], rounds: number) => {
     setGameConfig({
-      player1Name,
-      player2Name,
+      players,
       totalRounds: rounds
     });
     setGameMode("local");
@@ -108,8 +108,7 @@ const Index = () => {
   if (gameMode === "local" && gameConfig) {
     return (
       <GameBoard
-        player1Name={gameConfig.player1Name}
-        player2Name={gameConfig.player2Name}
+        players={gameConfig.players}
         totalRounds={gameConfig.totalRounds}
         onRestart={handleRestart}
       />

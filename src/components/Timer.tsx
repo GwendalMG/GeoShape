@@ -5,8 +5,15 @@ interface TimerProps {
   duration: number;
   isRunning: boolean;
   onTimeUp: () => void;
-  playerNumber: 1 | 2;
+  playerNumber: 1 | 2 | 3 | 4;
 }
+
+const PLAYER_TIMER_COLORS = {
+  1: "hsl(var(--player-one))",
+  2: "hsl(var(--player-two))",
+  3: "hsl(142 76% 46%)",
+  4: "hsl(270 70% 60%)",
+};
 
 export function Timer({ duration, isRunning, onTimeUp, playerNumber }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(duration);
@@ -36,13 +43,12 @@ export function Timer({ duration, isRunning, onTimeUp, playerNumber }: TimerProp
   
   const isLow = timeLeft <= 5;
   const isWarning = timeLeft <= 10 && timeLeft > 5;
-  const isPlayerOne = playerNumber === 1;
   
   // Progressive color based on urgency
   const getTimerColor = () => {
     if (isLow) return "hsl(var(--destructive))";
     if (isWarning) return "hsl(25 95% 53%)"; // Orange
-    return isPlayerOne ? "hsl(var(--player-one))" : "hsl(var(--player-two))";
+    return PLAYER_TIMER_COLORS[playerNumber];
   };
   
   const getTextColor = () => {
