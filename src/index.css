@@ -252,17 +252,22 @@
     conic-gradient(
       from 0deg,
       transparent 0deg,
-      transparent 170deg,
-      var(--player-color-light) 175deg,
-      var(--player-color) 180deg,
-      var(--player-color-light) 185deg,
-      transparent 190deg,
-      transparent 350deg,
-      var(--player-color-light) 355deg,
-      var(--player-color) 360deg,
-      var(--player-color-light) 5deg,
+      transparent 165deg,
+      var(--player-color-light) 170deg,
+      var(--player-color) 175deg,
+      var(--player-color-light) 180deg,
+      transparent 185deg,
+      transparent 345deg,
+      var(--player-color-light) 350deg,
+      var(--player-color) 355deg,
+      var(--player-color-light) 360deg,
+      transparent 5deg,
       transparent 10deg
     ) border-box;
-  animation: leading-neon 3s linear infinite;
-  opacity: 0.8;
+  animation: leading-neon 4s linear infinite;
+  opacity: 0.9;
+  box-shadow: 
+    0 0 10px var(--player-color-light),
+    0 0 20px var(--player-color-light),
+    inset 0 0 10px var(--player-color-light);
 }
