@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS public.game_rooms (
   country_indices INTEGER[] NOT NULL DEFAULT '{}',
   round_answered BOOLEAN NOT NULL DEFAULT false,
   round_start_turn TEXT CHECK (round_start_turn IN ('host', 'guest')),
-  used_country_ids TEXT[] DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );

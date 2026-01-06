@@ -190,28 +190,20 @@ function getDifficultyLimits(totalRounds: number): { min: number; max: number } 
   return { min: 6, max: 12 };
 }
 
-export function getRandomCountries(count: number, excludeIds: string[] = []): Country[] {
+export function getRandomCountries(count: number): Country[] {
   if (count <= 0 || countries.length === 0) {
     return [];
   }
   
-  // Filter out excluded countries
-  let availableCountries = countries.filter(c => !excludeIds.includes(c.id));
-  
-  // If all countries have been used, reset and allow all countries again
-  if (availableCountries.length === 0) {
-    availableCountries = countries;
-  }
-  
-  // Separate available countries by difficulty
-  const tresFacile = availableCountries.filter(c => c.difficulty === 'TRES_FACILE');
-  const facile = availableCountries.filter(c => c.difficulty === 'FACILE');
-  const difficile = availableCountries.filter(c => c.difficulty === 'DIFFICILE');
+  // Separate countries by difficulty
+  const tresFacile = countries.filter(c => c.difficulty === 'TRES_FACILE');
+  const facile = countries.filter(c => c.difficulty === 'FACILE');
+  const difficile = countries.filter(c => c.difficulty === 'DIFFICILE');
   
   // Safety check: ensure we have countries in each category
   if (tresFacile.length === 0 && facile.length === 0 && difficile.length === 0) {
     // Fallback: just return random countries
-    const shuffled = [...availableCountries].sort(() => Math.random() - 0.5);
+    const shuffled = [...countries].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(count, shuffled.length));
   }
   
@@ -245,7 +237,7 @@ export function getRandomCountries(count: number, excludeIds: string[] = []): Co
   // If we don't have enough countries, fill with random ones
   if (selected.length < count) {
     const remaining = count - selected.length;
-    const allOther = availableCountries.filter(c => !selected.some(s => s.id === c.id));
+    const allOther = countries.filter(c => !selected.some(s => s.id === c.id));
     const shuffled = [...allOther].sort(() => Math.random() - 0.5);
     selected.push(...shuffled.slice(0, remaining));
   }
