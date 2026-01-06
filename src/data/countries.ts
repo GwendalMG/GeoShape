@@ -190,6 +190,16 @@ function getDifficultyLimits(totalRounds: number): { min: number; max: number } 
   return { min: 6, max: 12 };
 }
 
+// Fisher-Yates shuffle algorithm for true random distribution
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function getRandomCountries(count: number): Country[] {
   if (count <= 0 || countries.length === 0) {
     return [];
@@ -202,8 +212,8 @@ export function getRandomCountries(count: number): Country[] {
   
   // Safety check: ensure we have countries in each category
   if (tresFacile.length === 0 && facile.length === 0 && difficile.length === 0) {
-    // Fallback: just return random countries
-    const shuffled = [...countries].sort(() => Math.random() - 0.5);
+    // Fallback: just return random countries using proper shuffle
+    const shuffled = shuffleArray(countries);
     return shuffled.slice(0, Math.min(count, shuffled.length));
   }
   
@@ -217,10 +227,10 @@ export function getRandomCountries(count: number): Country[] {
   const targetTresFacile = Math.min(Math.floor(count * 0.1), tresFacile.length);
   const targetFacile = Math.max(0, count - targetDifficile - targetTresFacile);
   
-  // Shuffle each category
-  const shuffledTresFacile = [...tresFacile].sort(() => Math.random() - 0.5);
-  const shuffledFacile = [...facile].sort(() => Math.random() - 0.5);
-  const shuffledDifficile = [...difficile].sort(() => Math.random() - 0.5);
+  // Shuffle each category using Fisher-Yates for true randomness
+  const shuffledTresFacile = shuffleArray(tresFacile);
+  const shuffledFacile = shuffleArray(facile);
+  const shuffledDifficile = shuffleArray(difficile);
   
   // Select countries from each category
   const selected: Country[] = [];
@@ -238,12 +248,13 @@ export function getRandomCountries(count: number): Country[] {
   if (selected.length < count) {
     const remaining = count - selected.length;
     const allOther = countries.filter(c => !selected.some(s => s.id === c.id));
-    const shuffled = [...allOther].sort(() => Math.random() - 0.5);
+    const shuffled = shuffleArray(allOther);
     selected.push(...shuffled.slice(0, remaining));
   }
   
-  // Shuffle the final selection to mix difficulties
-  return selected.sort(() => Math.random() - 0.5).slice(0, count);
+  // Shuffle the final selection to mix difficulties using proper shuffle
+  const finalShuffled = shuffleArray(selected);
+  return finalShuffled.slice(0, count);
 }
 
 export function normalizeAnswer(answer: string): string {
