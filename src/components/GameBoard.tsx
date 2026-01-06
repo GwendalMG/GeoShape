@@ -347,14 +347,16 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
       // Calculate points penalty based on difficulty
       // ONLY TRES_FACILE incurs penalty (-1 point)
       // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
-      if (currentCountry && currentCountry.difficulty === 'TRES_FACILE') {
+      // STRICT CHECK: Only subtract points if difficulty is EXACTLY 'TRES_FACILE'
+      const countryDifficulty = currentCountry?.difficulty;
+      if (countryDifficulty === 'TRES_FACILE') {
         setScores((prev) => {
           const newScores = [...prev];
           newScores[currentPlayerIndex] = Math.max(0, newScores[currentPlayerIndex] - 1);
           return newScores;
         });
       }
-      // For FACILE and DIFFICILE: no penalty, score remains unchanged
+      // For FACILE and DIFFICILE: explicitly do nothing - no penalty
       
       setAttemptsThisRound(prev => prev + 1);
       
@@ -409,14 +411,16 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
     // Calculate points penalty based on difficulty
     // ONLY TRES_FACILE incurs penalty (-1 point)
     // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
-    if (currentCountry && currentCountry.difficulty === 'TRES_FACILE') {
+    // STRICT CHECK: Only subtract points if difficulty is EXACTLY 'TRES_FACILE'
+    const countryDifficulty = currentCountry?.difficulty;
+    if (countryDifficulty === 'TRES_FACILE') {
       setScores((prev) => {
         const newScores = [...prev];
         newScores[currentPlayerIndex] = Math.max(0, newScores[currentPlayerIndex] - 1);
         return newScores;
       });
     }
-    // For FACILE and DIFFICILE: no penalty, score remains unchanged
+    // For FACILE and DIFFICILE: explicitly do nothing - no penalty
     
     setAttemptsThisRound(prev => prev + 1);
     

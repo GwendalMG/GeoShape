@@ -303,14 +303,16 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       // If wrong, apply penalty based on difficulty
       // ONLY TRES_FACILE incurs penalty (-1 point)
       // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
-      if (currentCountry && currentCountry.difficulty === 'TRES_FACILE') {
+      // STRICT CHECK: Only subtract points if difficulty is EXACTLY 'TRES_FACILE'
+      const countryDifficulty = currentCountry?.difficulty;
+      if (countryDifficulty === 'TRES_FACILE') {
         if (playerRole === "host") {
           updates.host_score = Math.max(0, room.host_score - 1);
         } else {
           updates.guest_score = Math.max(0, room.guest_score - 1);
         }
       }
-      // For FACILE and DIFFICILE: no penalty, score remains unchanged
+      // For FACILE and DIFFICILE: explicitly do nothing - no penalty
       // If wrong, switch turn to let the other player try
       // This allows the other player to try the same country
       const nextTurn = room.current_turn === "host" ? "guest" : "host";
@@ -347,14 +349,16 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     const currentCountry = countries[room.current_country_index];
     const updates: Partial<GameRoom> = {};
     
-    if (currentCountry && currentCountry.difficulty === 'TRES_FACILE') {
+    // STRICT CHECK: Only subtract points if difficulty is EXACTLY 'TRES_FACILE'
+    const countryDifficulty = currentCountry?.difficulty;
+    if (countryDifficulty === 'TRES_FACILE') {
       if (room.current_turn === "host") {
         updates.host_score = Math.max(0, room.host_score - 1);
       } else {
         updates.guest_score = Math.max(0, room.guest_score - 1);
       }
     }
-    // For FACILE and DIFFICILE: no penalty, score remains unchanged
+    // For FACILE and DIFFICILE: explicitly do nothing - no penalty
 
     // Switch turn immediately when time is up
     const nextTurn = room.current_turn === "host" ? "guest" : "host";
