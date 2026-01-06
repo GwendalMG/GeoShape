@@ -346,21 +346,15 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
       
       // Calculate points penalty based on difficulty
       // ONLY TRES_FACILE incurs penalty (-1 point)
-      // FACILE and DIFFICILE have NO penalty (0 point)
-      let pointsToSubtract = 0;
-      if (currentCountry.difficulty === 'TRES_FACILE') {
-        pointsToSubtract = 1;
-      } else if (currentCountry.difficulty === 'FACILE' || currentCountry.difficulty === 'DIFFICILE') {
-        pointsToSubtract = 0; // No penalty for FACILE or DIFFICILE
-      }
-      
-      if (pointsToSubtract > 0) {
+      // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
+      if (currentCountry && currentCountry.difficulty === 'TRES_FACILE') {
         setScores((prev) => {
           const newScores = [...prev];
-          newScores[currentPlayerIndex] = Math.max(0, newScores[currentPlayerIndex] - pointsToSubtract);
+          newScores[currentPlayerIndex] = Math.max(0, newScores[currentPlayerIndex] - 1);
           return newScores;
         });
       }
+      // For FACILE and DIFFICILE: no penalty, score remains unchanged
       
       setAttemptsThisRound(prev => prev + 1);
       
@@ -413,21 +407,16 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
     }
     
     // Calculate points penalty based on difficulty
-    // TRES_FACILE raté: -1 point, FACILE raté: 0 point, DIFFICILE raté: 0 point
-    let pointsToSubtract = 0;
-    if (currentCountry.difficulty === 'TRES_FACILE') {
-      pointsToSubtract = 1;
-    } else if (currentCountry.difficulty === 'FACILE' || currentCountry.difficulty === 'DIFFICILE') {
-      pointsToSubtract = 0; // No penalty for FACILE or DIFFICILE
-    }
-    
-    if (pointsToSubtract > 0) {
+    // ONLY TRES_FACILE incurs penalty (-1 point)
+    // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
+    if (currentCountry && currentCountry.difficulty === 'TRES_FACILE') {
       setScores((prev) => {
         const newScores = [...prev];
-        newScores[currentPlayerIndex] = Math.max(0, newScores[currentPlayerIndex] - pointsToSubtract);
+        newScores[currentPlayerIndex] = Math.max(0, newScores[currentPlayerIndex] - 1);
         return newScores;
       });
     }
+    // For FACILE and DIFFICILE: no penalty, score remains unchanged
     
     setAttemptsThisRound(prev => prev + 1);
     
