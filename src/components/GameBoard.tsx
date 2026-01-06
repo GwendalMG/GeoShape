@@ -386,7 +386,14 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
   }, [currentCountry, currentPlayerIndex, phase, numPlayers, attemptsThisRound, getNextPlayerIndex, goToNextRound, sabotagedPlayers]);
   
   const handleTimeUp = useCallback(() => {
-    if (!currentCountry) return;
+    if (!currentCountry) {
+      // If no country, still continue to next round to avoid blocking
+      goToNextRound(false);
+      return;
+    }
+    
+    // Stop the timer immediately
+    setIsTimerRunning(false);
     
     // Incrémenter le compteur de tentatives pour ce joueur
     setAttemptsPerPlayer(prev => {
@@ -426,28 +433,34 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
     }
     // For FACILE and DIFFICILE: explicitly do nothing - no penalty
     
-    setAttemptsThisRound(prev => prev + 1);
-    
-    setTimeout(() => {
-      setFeedback(null);
+    // Update attemptsThisRound and use the new value in the callback
+    setAttemptsThisRound(prev => {
+      const newAttempts = prev + 1;
       
-      // Check if all players have tried
-      if (attemptsThisRound >= numPlayers - 1) {
-        // All players failed, go to next round
-        setRoundResults((prev) => [...prev, { winner: null }]);
-        setPhase("revealed");
-        setTimeout(() => {
-          goToNextRound(false);
-        }, 3000);
-      } else {
-        // Move to next player to try the same country (skip frozen player)
-        const nextPlayerIndex = getNextPlayerIndex(currentPlayerIndex);
-        setCurrentPlayerIndex(nextPlayerIndex);
-        setIsTimerRunning(true);
-        setPhase("playing");
-      }
-    }, 1000);
-  }, [currentCountry, currentPlayerIndex, numPlayers, attemptsThisRound, getNextPlayerIndex, sabotagedPlayers]);
+      // Schedule the continuation logic after state update
+      setTimeout(() => {
+        setFeedback(null);
+        
+        // Check if all players have tried (use the updated value)
+        if (newAttempts >= numPlayers - 1) {
+          // All players failed, go to next round
+          setRoundResults(prevResults => [...prevResults, { winner: null }]);
+          setPhase("revealed");
+          setTimeout(() => {
+            goToNextRound(false);
+          }, 3000);
+        } else {
+          // Move to next player to try the same country (skip frozen player)
+          const nextPlayerIndex = getNextPlayerIndex(currentPlayerIndex);
+          setCurrentPlayerIndex(nextPlayerIndex);
+          setIsTimerRunning(true);
+          setPhase("playing");
+        }
+      }, 1000);
+      
+      return newAttempts;
+    });
+  }, [currentCountry, currentPlayerIndex, numPlayers, getNextPlayerIndex, sabotagedPlayers, goToNextRound]);
   
   // Check if current player is frozen and skip their turn
   useEffect(() => {
