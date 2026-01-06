@@ -200,6 +200,9 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+// Store last selection offset to avoid always picking the same countries
+let lastSelectionOffset = 0;
+
 export function getRandomCountries(count: number): Country[] {
   if (count <= 0 || countries.length === 0) {
     return [];
@@ -222,29 +225,55 @@ export function getRandomCountries(count: number): Country[] {
   const numDifficile = Math.floor(Math.random() * (limits.max - limits.min + 1)) + limits.min;
   
   // Calculate distribution: 70% FACILE, 10% TRES_FACILE, 20% DIFFICILE (with limits)
-  // Réduire TRES_FACILE et augmenter DIFFICILE
   const targetDifficile = Math.min(numDifficile, Math.floor(count * 0.2), difficile.length);
   const targetTresFacile = Math.min(Math.floor(count * 0.1), tresFacile.length);
   const targetFacile = Math.max(0, count - targetDifficile - targetTresFacile);
   
-  // Shuffle each category using Fisher-Yates for true randomness
-  const shuffledTresFacile = shuffleArray(tresFacile);
-  const shuffledFacile = shuffleArray(facile);
-  const shuffledDifficile = shuffleArray(difficile);
+  // Shuffle each category multiple times for better randomization
+  let shuffledTresFacile = shuffleArray(tresFacile);
+  shuffledTresFacile = shuffleArray(shuffledTresFacile); // Double shuffle for more variety
   
-  // Select countries from each category
+  let shuffledFacile = shuffleArray(facile);
+  shuffledFacile = shuffleArray(shuffledFacile); // Double shuffle for more variety
+  
+  let shuffledDifficile = shuffleArray(difficile);
+  shuffledDifficile = shuffleArray(shuffledDifficile); // Double shuffle for more variety
+  
+  // Use a rotating offset to avoid always picking the same countries
+  // This ensures we cycle through all countries over time
+  const offsetDifficile = lastSelectionOffset % Math.max(1, shuffledDifficile.length);
+  const offsetTresFacile = (lastSelectionOffset * 2) % Math.max(1, shuffledTresFacile.length);
+  const offsetFacile = (lastSelectionOffset * 3) % Math.max(1, shuffledFacile.length);
+  
+  // Select countries from each category starting at different offsets
   const selected: Country[] = [];
+  
   if (targetDifficile > 0 && shuffledDifficile.length > 0) {
-    selected.push(...shuffledDifficile.slice(0, targetDifficile));
-  }
-  if (targetTresFacile > 0 && shuffledTresFacile.length > 0) {
-    selected.push(...shuffledTresFacile.slice(0, targetTresFacile));
-  }
-  if (targetFacile > 0 && shuffledFacile.length > 0) {
-    selected.push(...shuffledFacile.slice(0, Math.min(targetFacile, shuffledFacile.length)));
+    // Create a rotated array starting from the offset
+    const rotatedDifficile = [
+      ...shuffledDifficile.slice(offsetDifficile),
+      ...shuffledDifficile.slice(0, offsetDifficile)
+    ];
+    selected.push(...rotatedDifficile.slice(0, targetDifficile));
   }
   
-  // If we don't have enough countries, fill with random ones
+  if (targetTresFacile > 0 && shuffledTresFacile.length > 0) {
+    const rotatedTresFacile = [
+      ...shuffledTresFacile.slice(offsetTresFacile),
+      ...shuffledTresFacile.slice(0, offsetTresFacile)
+    ];
+    selected.push(...rotatedTresFacile.slice(0, targetTresFacile));
+  }
+  
+  if (targetFacile > 0 && shuffledFacile.length > 0) {
+    const rotatedFacile = [
+      ...shuffledFacile.slice(offsetFacile),
+      ...shuffledFacile.slice(0, offsetFacile)
+    ];
+    selected.push(...rotatedFacile.slice(0, Math.min(targetFacile, shuffledFacile.length)));
+  }
+  
+  // If we don't have enough countries, fill with random ones from remaining
   if (selected.length < count) {
     const remaining = count - selected.length;
     const allOther = countries.filter(c => !selected.some(s => s.id === c.id));
@@ -252,8 +281,13 @@ export function getRandomCountries(count: number): Country[] {
     selected.push(...shuffled.slice(0, remaining));
   }
   
-  // Shuffle the final selection to mix difficulties using proper shuffle
-  const finalShuffled = shuffleArray(selected);
+  // Shuffle the final selection multiple times to mix difficulties
+  let finalShuffled = shuffleArray(selected);
+  finalShuffled = shuffleArray(finalShuffled); // Double shuffle for better mixing
+  
+  // Update offset for next selection (increment by a prime number to avoid patterns)
+  lastSelectionOffset = (lastSelectionOffset + 7) % Math.max(1, countries.length);
+  
   return finalShuffled.slice(0, count);
 }
 
