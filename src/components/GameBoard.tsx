@@ -349,6 +349,8 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
       // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
       // STRICT CHECK: Only subtract points if difficulty is EXACTLY 'TRES_FACILE'
       const countryDifficulty = currentCountry?.difficulty;
+      
+      // ONLY apply penalty if difficulty is EXACTLY 'TRES_FACILE'
       if (countryDifficulty === 'TRES_FACILE') {
         setScores((prev) => {
           const newScores = [...prev];
@@ -413,6 +415,8 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
     // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
     // STRICT CHECK: Only subtract points if difficulty is EXACTLY 'TRES_FACILE'
     const countryDifficulty = currentCountry?.difficulty;
+    
+    // ONLY apply penalty if difficulty is EXACTLY 'TRES_FACILE'
     if (countryDifficulty === 'TRES_FACILE') {
       setScores((prev) => {
         const newScores = [...prev];
@@ -712,6 +716,7 @@ export function GameBoard({ players, totalRounds, onRestart }: GameBoardProps) {
             playerNumber={(currentPlayerIndex + 1) as 1 | 2 | 3 | 4}
             feedback={feedback}
             isHardCountry={currentCountry?.difficulty === 'DIFFICILE'}
+            countryDifficulty={currentCountry?.difficulty}
           />
           
           {/* Joker Buttons */}

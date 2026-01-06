@@ -7,6 +7,7 @@ interface AnswerInputProps {
   playerNumber: 1 | 2 | 3 | 4;
   feedback?: "correct" | "wrong" | null;
   isHardCountry?: boolean;
+  countryDifficulty?: 'TRES_FACILE' | 'FACILE' | 'DIFFICILE';
 }
 
 const PLAYER_INPUT_COLORS = {
@@ -16,7 +17,7 @@ const PLAYER_INPUT_COLORS = {
   4: { border: "border-purple-500/50", focusBorder: "border-purple-500", focusGlow: "focus:glow-purple-500", bg: "bg-purple-500", hoverBg: "hover:bg-purple-500/80", hoverShadow: "hover:shadow-purple-500/50" },
 };
 
-export function AnswerInput({ onSubmit, disabled, playerNumber, feedback, isHardCountry = false }: AnswerInputProps) {
+export function AnswerInput({ onSubmit, disabled, playerNumber, feedback, isHardCountry = false, countryDifficulty }: AnswerInputProps) {
   const [value, setValue] = useState("");
   const colors = PLAYER_INPUT_COLORS[playerNumber];
   
@@ -102,7 +103,11 @@ export function AnswerInput({ onSubmit, disabled, playerNumber, feedback, isHard
                 )}
               </span>
             ) : (
-              <span>Raté ! -1 point 😅</span>
+              <span>
+                {countryDifficulty === 'TRES_FACILE' 
+                  ? "Raté ! -1 point 😅" 
+                  : "Raté !"}
+              </span>
             )}
           </p>
         </div>
