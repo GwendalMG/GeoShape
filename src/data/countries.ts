@@ -13,10 +13,10 @@ export interface Country {
 const countryNames: Record<string, { name: string; nameFr: string; funFact: string; capital: string; difficulty: 'TRES_FACILE' | 'FACILE' | 'DIFFICILE' }> = {
   // Europe
   FR: { name: "France", nameFr: "France", capital: "Paris", funFact: "Ce territoire hexagonal abrite la plus haute montagne d'Europe occidentale et compte plus de 400 variétés de fromages." , difficulty: "TRES_FACILE" },
-  IT: { name: "Italy", nameFr: "Italie", capital: "Rome", funFact: "Cette botte célèbre possède plus de sites UNESCO que tout autre pays au monde." , difficulty: "FACILE" },
+  IT: { name: "Italy", nameFr: "Italie", capital: "Rome", funFact: "Cette botte célèbre possède plus de sites UNESCO que tout autre pays au monde." , difficulty: "TRES_FACILE" },
   DE: { name: "Germany", nameFr: "Allemagne", capital: "Berlin", funFact: "Neuf pays sont ses voisins, ce qui en fait le pays européen avec le plus de frontières terrestres." , difficulty: "TRES_FACILE" },
   ES: { name: "Spain", nameFr: "Espagne", capital: "Madrid", funFact: "Sa superficie inclut des îles volcaniques au large de l'Afrique et une enclave en terre africaine." , difficulty: "TRES_FACILE" },
-  GB: { name: "United Kingdom", nameFr: "Royaume-Uni", capital: "Londres", funFact: "Cet archipel insulaire possède plus de 6 000 îles dont seulement 138 sont habitées." , difficulty: "FACILE" },
+  GB: { name: "United Kingdom", nameFr: "Royaume-Uni", capital: "Londres", funFact: "Cet archipel insulaire possède plus de 6 000 îles dont seulement 138 sont habitées." , difficulty: "TRES_FACILE" },
   PT: { name: "Portugal", nameFr: "Portugal", capital: "Lisbonne", funFact: "Le point le plus occidental du continent européen se trouve sur son territoire." , difficulty: "FACILE" },
   GR: { name: "Greece", nameFr: "Grèce", capital: "Athènes", funFact: "Plus de 6 000 îles et îlots composent ce territoire, mais seulement 227 sont habités." , difficulty: "TRES_FACILE" },
   SE: { name: "Sweden", nameFr: "Suède", capital: "Stockholm", funFact: "Ce territoire s'étire sur plus de 1 500 km du nord au sud et compte environ 100 000 lacs." , difficulty: "FACILE" },
@@ -50,8 +50,8 @@ const countryNames: Record<string, { name: string; nameFr: string; funFact: stri
   MD: { name: "Moldova", nameFr: "Moldavie", capital: "Chișinău", funFact: "Enclavé entre deux grands voisins, ce territoire est traversé par un affluent majeur.", difficulty: "FACILE" },
   
   // Asie
-  JP: { name: "Japan", nameFr: "Japon", capital: "Tokyo", funFact: "Cet archipel volcanique compte plus de 6 800 îles dont quatre principales." , difficulty: "FACILE" },
-  CN: { name: "China", nameFr: "Chine", capital: "Pékin", funFact: "Le troisième plus grand pays du monde possède 14 voisins frontaliers." , difficulty: "FACILE" },
+  JP: { name: "Japan", nameFr: "Japon", capital: "Tokyo", funFact: "Cet archipel volcanique compte plus de 6 800 îles dont quatre principales." , difficulty: "TRES_FACILE" },
+  CN: { name: "China", nameFr: "Chine", capital: "Pékin", funFact: "Le troisième plus grand pays du monde possède 14 voisins frontaliers." , difficulty: "TRES_FACILE" },
   IN: { name: "India", nameFr: "Inde", capital: "New Delhi", funFact: "Cette immense péninsule triangulaire est bordée par trois mers différentes." , difficulty: "TRES_FACILE" },
   KR: { name: "South Korea", nameFr: "Corée du Sud", capital: "Séoul", funFact: "Cette péninsule montagneuse est entourée par trois mers et séparée en deux." , difficulty: "FACILE" },
   TH: { name: "Thailand", nameFr: "Thaïlande", capital: "Bangkok", funFact: "Sa forme rappelle une tête d'éléphant, avec un corps étiré vers le sud en péninsule." , difficulty: "FACILE" },
@@ -115,8 +115,8 @@ const countryNames: Record<string, { name: string; nameFr: string; funFact: stri
   // Afrique
   EG: { name: "Egypt", nameFr: "Égypte", capital: "Le Caire", funFact: "Ce territoire désertique est traversé par le plus long fleuve du monde." , difficulty: "FACILE" },
   ZA: { name: "South Africa", nameFr: "Afrique du Sud", capital: "Pretoria", funFact: "Ce territoire possède trois capitales et entoure complètement un petit royaume montagneux." , difficulty: "TRES_FACILE" },
-  MA: { name: "Morocco", nameFr: "Maroc", capital: "Rabat", funFact: "La pointe nord-ouest de l'Afrique se trouve à seulement 14 km de l'Europe." , difficulty: "TRES_FACILE" },
-  DZ: { name: "Algeria", nameFr: "Algérie", capital: "Alger", funFact: "Le plus grand pays d'Afrique est couvert à 90% par le Sahara." , difficulty: "TRES_FACILE" },
+  MA: { name: "Morocco", nameFr: "Maroc", capital: "Rabat", funFact: "La pointe nord-ouest de l'Afrique se trouve à seulement 14 km de l'Europe." , difficulty: "FACILE" },
+  DZ: { name: "Algeria", nameFr: "Algérie", capital: "Alger", funFact: "Le plus grand pays d'Afrique est couvert à 90% par le Sahara." , difficulty: "FACILE" },
   TN: { name: "Tunisia", nameFr: "Tunisie", capital: "Tunis", funFact: "Le point le plus septentrional d'Afrique se trouve dans ce territoire méditerranéen." , difficulty: "FACILE" },
   NG: { name: "Nigeria", nameFr: "Nigeria", capital: "Abuja", funFact: "Le pays le plus peuplé d'Afrique est traversé par un grand fleuve éponyme." , difficulty: "FACILE" },
   KE: { name: "Kenya", nameFr: "Kenya", capital: "Nairobi", funFact: "L'équateur traverse ce territoire qui abrite la Great Rift Valley." , difficulty: "FACILE" },
