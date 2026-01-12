@@ -57,8 +57,8 @@ const Index = () => {
     setGameMode("multiplayer-lobby");
   };
 
-  const handleCreateRoom = async (hostName: string, rounds: number) => {
-    const code = await createRoom(hostName, rounds);
+  const handleCreateRoom = async (hostName: string, rounds: number, maxPlayers: number) => {
+    const code = await createRoom(hostName, rounds, maxPlayers);
     return code;
   };
 

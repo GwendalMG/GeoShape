@@ -4,7 +4,7 @@ import { Globe, Users, Wifi, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MultiplayerLobbyProps {
-  onCreateRoom: (hostName: string, rounds: number) => Promise<string | null>;
+  onCreateRoom: (hostName: string, rounds: number, maxPlayers: number) => Promise<string | null>;
   onJoinRoom: (roomCode: string, guestName: string) => Promise<boolean>;
   onBack: () => void;
   loading: boolean;
@@ -22,13 +22,14 @@ export function MultiplayerLobby({
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const [rounds, setRounds] = useState(10);
+  const [maxPlayers, setMaxPlayers] = useState(2);
   const [createdRoomCode, setCreatedRoomCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const handleCreate = async () => {
     if (!playerName.trim()) return;
-    const code = await onCreateRoom(playerName.trim(), rounds);
+    const code = await onCreateRoom(playerName.trim(), rounds, maxPlayers);
     if (code) {
       setCreatedRoomCode(code);
     }
@@ -70,7 +71,7 @@ export function MultiplayerLobby({
               <span className="text-gradient-gold">Room créée !</span>
             </h1>
             <p className="text-muted-foreground text-lg">
-              En attente d'un adversaire...
+              En attente de {maxPlayers - 1} autre{maxPlayers > 2 ? 's' : ''} joueur{maxPlayers > 2 ? 's' : ''}...
             </p>
           </div>
 
@@ -203,26 +204,48 @@ export function MultiplayerLobby({
             )}
 
             {mode === "create" && (
-              <div>
-                <label className="text-sm uppercase tracking-wider font-medium text-muted-foreground mb-2 block">
-                  Nombre de pays
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  {[10, 20, 30, 40, 50].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => setRounds(num)}
-                      className={`flex-1 min-w-[60px] py-3 rounded-xl font-bold text-lg transition-all ${
-                        rounds === num
-                          ? "bg-primary text-primary-foreground glow-gold"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
+              <>
+                <div>
+                  <label className="text-sm uppercase tracking-wider font-medium text-muted-foreground mb-2 block">
+                    Nombre de joueurs
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    {[2, 3, 4].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => setMaxPlayers(num)}
+                        className={`flex-1 min-w-[60px] py-3 rounded-xl font-bold text-lg transition-all ${
+                          maxPlayers === num
+                            ? "bg-primary text-primary-foreground glow-gold"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+                <div>
+                  <label className="text-sm uppercase tracking-wider font-medium text-muted-foreground mb-2 block">
+                    Nombre de pays
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    {[10, 20, 30, 40, 50].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => setRounds(num)}
+                        className={`flex-1 min-w-[60px] py-3 rounded-xl font-bold text-lg transition-all ${
+                          rounds === num
+                            ? "bg-primary text-primary-foreground glow-gold"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </div>
 

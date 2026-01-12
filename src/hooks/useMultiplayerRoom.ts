@@ -9,6 +9,7 @@ export interface GameRoom {
   guest_name: string | null;
   player3_name?: string | null;
   player4_name?: string | null;
+  max_players?: number; // Maximum number of players (2, 3, or 4)
   total_rounds: number;
   current_round: number;
   current_country_index: number | null;
@@ -31,7 +32,7 @@ interface UseMultiplayerRoomReturn {
   playerRole: "host" | "guest" | "player3" | "player4" | null;
   loading: boolean;
   error: string | null;
-  createRoom: (hostName: string, totalRounds: number) => Promise<string | null>;
+  createRoom: (hostName: string, totalRounds: number, maxPlayers?: number) => Promise<string | null>;
   joinRoom: (roomCode: string, guestName: string) => Promise<boolean>;
   startGame: () => Promise<void>;
   submitAnswer: (answer: string) => Promise<{ correct: boolean; countryName: string }>;
@@ -96,7 +97,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     };
   }, [room?.id]);
 
-  const createRoom = useCallback(async (hostName: string, totalRounds: number): Promise<string | null> => {
+  const createRoom = useCallback(async (hostName: string, totalRounds: number, maxPlayers: number = 2): Promise<string | null> => {
     setLoading(true);
     setError(null);
 
@@ -110,6 +111,9 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         return null;
       }
 
+      // Validate maxPlayers (2-4)
+      const validMaxPlayers = Math.max(2, Math.min(4, maxPlayers));
+
       const roomCode = generateRoomCode();
       const countryIndices = shuffleArray(
         Array.from({ length: countries.length }, (_, i) => i)
@@ -122,6 +126,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
           host_name: hostName,
           total_rounds: totalRounds,
           country_indices: countryIndices,
+          max_players: validMaxPlayers,
         })
         .select()
         .single();
@@ -166,21 +171,32 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         return false;
       }
 
-      // Determine which player slot is available (up to 4 players)
+      // Get max players from room (default to 2 if not set for backward compatibility)
+      const maxPlayers = existingRoom.max_players || 2;
+      
+      // Count current players
+      const currentPlayers = 1 + (existingRoom.guest_name ? 1 : 0) + (existingRoom.player3_name ? 1 : 0) + (existingRoom.player4_name ? 1 : 0);
+      
+      if (currentPlayers >= maxPlayers) {
+        setError(`Room is full (${maxPlayers} players maximum)`);
+        return false;
+      }
+
+      // Determine which player slot is available
       let updateData: any = {};
       let newRole: "guest" | "player3" | "player4" | null = null;
 
       if (!existingRoom.guest_name) {
         updateData.guest_name = guestName;
         newRole = "guest";
-      } else if (!existingRoom.player3_name) {
+      } else if (maxPlayers >= 3 && !existingRoom.player3_name) {
         updateData.player3_name = guestName;
         newRole = "player3";
-      } else if (!existingRoom.player4_name) {
+      } else if (maxPlayers >= 4 && !existingRoom.player4_name) {
         updateData.player4_name = guestName;
         newRole = "player4";
       } else {
-        setError("Room is full (4 players maximum)");
+        setError(`Room is full (${maxPlayers} players maximum)`);
         return false;
       }
 
