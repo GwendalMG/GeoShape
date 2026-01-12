@@ -7,16 +7,20 @@ export interface GameRoom {
   room_code: string;
   host_name: string;
   guest_name: string | null;
+  player3_name?: string | null;
+  player4_name?: string | null;
   total_rounds: number;
   current_round: number;
   current_country_index: number | null;
   host_score: number;
   guest_score: number;
+  player3_score?: number;
+  player4_score?: number;
   status: "waiting" | "playing" | "finished";
-  current_turn: "host" | "guest" | null;
+  current_turn: "host" | "guest" | "player3" | "player4" | null;
   country_indices: number[];
   round_answered: boolean;
-  round_start_turn: "host" | "guest" | null; // Track who started the current round
+  round_start_turn: "host" | "guest" | "player3" | "player4" | null; // Track who started the current round
   created_at: string;
   updated_at: string;
 }
@@ -24,7 +28,7 @@ export interface GameRoom {
 interface UseMultiplayerRoomReturn {
   room: GameRoom | null;
   isHost: boolean;
-  playerRole: "host" | "guest" | null;
+  playerRole: "host" | "guest" | "player3" | "player4" | null;
   loading: boolean;
   error: string | null;
   createRoom: (hostName: string, totalRounds: number) => Promise<string | null>;
@@ -57,7 +61,7 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
   const [room, setRoom] = useState<GameRoom | null>(null);
-  const [playerRole, setPlayerRole] = useState<"host" | "guest" | null>(null);
+  const [playerRole, setPlayerRole] = useState<"host" | "guest" | "player3" | "player4" | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -162,15 +166,28 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         return false;
       }
 
-      if (existingRoom.guest_name) {
-        setError("Room is full");
+      // Determine which player slot is available (up to 4 players)
+      let updateData: any = {};
+      let newRole: "guest" | "player3" | "player4" | null = null;
+
+      if (!existingRoom.guest_name) {
+        updateData.guest_name = guestName;
+        newRole = "guest";
+      } else if (!existingRoom.player3_name) {
+        updateData.player3_name = guestName;
+        newRole = "player3";
+      } else if (!existingRoom.player4_name) {
+        updateData.player4_name = guestName;
+        newRole = "player4";
+      } else {
+        setError("Room is full (4 players maximum)");
         return false;
       }
 
       // Join the room
       const { data, error: updateError } = await supabase
         .from("game_rooms")
-        .update({ guest_name: guestName })
+        .update(updateData)
         .eq("id", existingRoom.id)
         .select()
         .single();
@@ -178,7 +195,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       if (updateError) throw updateError;
 
       setRoom(data as GameRoom);
-      setPlayerRole("guest");
+      setPlayerRole(newRole);
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to join room");
@@ -188,14 +205,32 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     }
   }, []);
 
+  // Helper function to get number of players
+  const getNumPlayers = useCallback((room: GameRoom): number => {
+    return 1 + (room.guest_name ? 1 : 0) + (room.player3_name ? 1 : 0) + (room.player4_name ? 1 : 0);
+  }, []);
+
+  // Helper function to get next player turn
+  const getNextTurn = useCallback((currentTurn: string, numPlayers: number): string => {
+    const players = ["host"];
+    if (numPlayers >= 2) players.push("guest");
+    if (numPlayers >= 3) players.push("player3");
+    if (numPlayers >= 4) players.push("player4");
+    
+    const currentIndex = players.indexOf(currentTurn);
+    const nextIndex = (currentIndex + 1) % players.length;
+    return players[nextIndex];
+  }, []);
+
   const startGame = useCallback(async () => {
     if (!room || playerRole !== "host") {
       setError("Vous devez être l'hôte pour lancer la partie");
       return;
     }
 
-    if (!room.guest_name) {
-      setError("Un adversaire doit rejoindre la room avant de lancer la partie");
+    const numPlayers = getNumPlayers(room);
+    if (numPlayers < 2) {
+      setError("Au moins un autre joueur doit rejoindre la room avant de lancer la partie");
       return;
     }
 
@@ -291,14 +326,20 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
 
     const updates: Partial<GameRoom> = {};
 
+    const numPlayers = getNumPlayers(room);
+
     if (isCorrect) {
       // If correct, mark round as answered and give point
       // Don't switch turn - we'll go to next round directly
       updates.round_answered = true;
       if (playerRole === "host") {
         updates.host_score = room.host_score + 1;
-      } else {
+      } else if (playerRole === "guest") {
         updates.guest_score = room.guest_score + 1;
+      } else if (playerRole === "player3") {
+        updates.player3_score = (room.player3_score || 0) + 1;
+      } else if (playerRole === "player4") {
+        updates.player4_score = (room.player4_score || 0) + 1;
       }
     } else {
       // If wrong, apply penalty based on difficulty
@@ -309,27 +350,28 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
       if (countryDifficulty === 'TRES_FACILE') {
         if (playerRole === "host") {
           updates.host_score = Math.max(0, room.host_score - 1);
-        } else {
+        } else if (playerRole === "guest") {
           updates.guest_score = Math.max(0, room.guest_score - 1);
+        } else if (playerRole === "player3") {
+          updates.player3_score = Math.max(0, (room.player3_score || 0) - 1);
+        } else if (playerRole === "player4") {
+          updates.player4_score = Math.max(0, (room.player4_score || 0) - 1);
         }
       }
       // For FACILE and DIFFICILE: explicitly do nothing - no penalty
-      // If wrong, switch turn to let the other player try
-      // This allows the other player to try the same country
-      const nextTurn = room.current_turn === "host" ? "guest" : "host";
-      updates.current_turn = nextTurn;
+      // If wrong, switch turn to let the next player try
+      const nextTurn = getNextTurn(room.current_turn || "host", numPlayers);
+      updates.current_turn = nextTurn as any;
       
-      // Check if both players have tried
-      // Round 1 starts with host, round 2 with guest, etc.
-      // If we're switching back to the player who should have started this round, both have tried
-      const expectedRoundStart = room.current_round % 2 === 1 ? "host" : "guest";
-      const roundStartTurn = room.round_start_turn || expectedRoundStart;
+      // Check if all players have tried
+      // If we're switching back to the player who should have started this round, all have tried
+      const roundStartTurn = room.round_start_turn || "host";
       
       if (nextTurn === roundStartTurn) {
-        // We're switching back to the starting player, meaning both have tried and both failed
+        // We're switching back to the starting player, meaning all players have tried and all failed
         updates.round_answered = true; // Mark as answered so we can move to next round
       }
-      // Otherwise, the other player still needs to try
+      // Otherwise, the next player still needs to try
       // So don't mark as answered yet
     }
 
@@ -344,6 +386,8 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
   const handleTimeUp = useCallback(async () => {
     if (!room || room.current_country_index === null) return;
 
+    const numPlayers = getNumPlayers(room);
+
     // Apply penalty based on difficulty when time is up
     // ONLY TRES_FACILE incurs penalty (-1 point)
     // FACILE and DIFFICILE have NO penalty (0 point) - do nothing
@@ -353,28 +397,27 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     // STRICT CHECK: Only subtract points if difficulty is EXACTLY 'TRES_FACILE'
     const countryDifficulty = currentCountry?.difficulty;
     if (countryDifficulty === 'TRES_FACILE') {
-      if (room.current_turn === "host") {
+      const currentTurn = room.current_turn || "host";
+      if (currentTurn === "host") {
         updates.host_score = Math.max(0, room.host_score - 1);
-      } else {
+      } else if (currentTurn === "guest") {
         updates.guest_score = Math.max(0, room.guest_score - 1);
+      } else if (currentTurn === "player3") {
+        updates.player3_score = Math.max(0, (room.player3_score || 0) - 1);
+      } else if (currentTurn === "player4") {
+        updates.player4_score = Math.max(0, (room.player4_score || 0) - 1);
       }
     }
     // For FACILE and DIFFICILE: explicitly do nothing - no penalty
 
     // Switch turn immediately when time is up
-    const nextTurn = room.current_turn === "host" ? "guest" : "host";
+    const currentTurn = room.current_turn || "host";
+    const nextTurn = getNextTurn(currentTurn, numPlayers);
+    updates.current_turn = nextTurn as any;
 
-    // Check if both players have tried (similar logic to submitAnswer)
-    // Rounds always start with host, so:
-    // - If host's time is up → switch to guest (guest can try)
-    // - If guest's time is up → switch back to host (both have tried, end round)
-    updates.current_turn = nextTurn; // Switch turn immediately
-
-    // Check if both players have tried
-    // Round 1 starts with host, round 2 with guest, etc.
-    // If we're switching back to the player who should have started this round, both have tried
-    const expectedRoundStart = room.current_round % 2 === 1 ? "host" : "guest";
-    const roundStartTurn = room.round_start_turn || expectedRoundStart;
+    // Check if all players have tried
+    // If we're switching back to the player who should have started this round, all have tried
+    const roundStartTurn = room.round_start_turn || "host";
     
     if (nextTurn === roundStartTurn) {
       // We're switching back to the starting player, meaning both have tried and both failed
@@ -400,17 +443,19 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         .update({ status: "finished" })
         .eq("id", room.id);
     } else {
-      // Alternate starting player based on who started the previous round
-      // If previous round started with host, next round starts with guest, and vice versa
-      // This ensures strict alternation regardless of who found the country or who failed
-      const previousRoundStart = room.round_start_turn || (room.current_round % 2 === 1 ? "host" : "guest");
-      const nextTurn: "host" | "guest" = previousRoundStart === "host" ? "guest" : "host";
+      // Rotate starting player based on number of players
+      // For 2 players: alternate host/guest
+      // For 3 players: rotate host -> guest -> player3 -> host
+      // For 4 players: rotate host -> guest -> player3 -> player4 -> host
+      const numPlayers = getNumPlayers(room);
+      const previousRoundStart = room.round_start_turn || "host";
+      const nextTurn = getNextTurn(previousRoundStart, numPlayers);
       
       // Build update payload - try to include round_start_turn
       const updatePayload: any = {
         current_round: nextRoundNum,
         current_country_index: room.country_indices[nextRoundNum - 1],
-        current_turn: nextTurn, // Alternate starting player
+        current_turn: nextTurn, // Rotate starting player
         round_answered: false,
         round_start_turn: nextTurn, // Track who starts this round
       };
@@ -429,7 +474,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
           .eq("id", room.id);
       }
     }
-  }, [room]);
+  }, [room, getNumPlayers, getNextTurn]);
 
   const restartGame = useCallback(async () => {
     if (!room) return;
@@ -452,6 +497,8 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         current_country_index: null,
         host_score: 0,
         guest_score: 0,
+        player3_score: 0,
+        player4_score: 0,
         status: "waiting",
         current_turn: null,
         country_indices: countryIndices,

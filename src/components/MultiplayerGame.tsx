@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 interface MultiplayerGameProps {
   room: GameRoom;
-  playerRole: "host" | "guest";
+  playerRole: "host" | "guest" | "player3" | "player4";
   onSubmitAnswer: (answer: string) => Promise<{ correct: boolean; countryName: string }>;
   onTimeUp: () => Promise<void>;
   onNextRound: () => Promise<void>;
@@ -225,13 +225,21 @@ export function MultiplayerGame({
 
   // Game finished
   if (room.status === "finished") {
-    const hostWins = room.host_score > room.guest_score;
-    const guestWins = room.guest_score > room.host_score;
-    const tie = room.host_score === room.guest_score;
-    const iWon = (playerRole === "host" && hostWins) || (playerRole === "guest" && guestWins);
+    const numPlayers = 1 + (room.guest_name ? 1 : 0) + (room.player3_name ? 1 : 0) + (room.player4_name ? 1 : 0);
+    const scores = [
+      { role: "host" as const, name: room.host_name, score: room.host_score },
+      ...(room.guest_name ? [{ role: "guest" as const, name: room.guest_name, score: room.guest_score }] : []),
+      ...(room.player3_name ? [{ role: "player3" as const, name: room.player3_name, score: room.player3_score || 0 }] : []),
+      ...(room.player4_name ? [{ role: "player4" as const, name: room.player4_name, score: room.player4_score || 0 }] : []),
+    ];
     
-    // Score denominator: each player guesses half the countries
-    const maxScorePerPlayer = Math.ceil(room.total_rounds / 2);
+    const maxScore = Math.max(...scores.map(s => s.score));
+    const winners = scores.filter(s => s.score === maxScore);
+    const isTie = winners.length > 1;
+    const iWon = winners.some(w => w.role === playerRole);
+    
+    // Score denominator: each player guesses approximately total_rounds / numPlayers countries
+    const maxScorePerPlayer = Math.ceil(room.total_rounds / numPlayers);
 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6">
@@ -240,35 +248,49 @@ export function MultiplayerGame({
             <Trophy className="w-10 h-10 md:w-12 md:h-12 text-primary" />
           </div>
           <h2 className="text-3xl md:text-4xl font-black mb-2">
-            {tie ? "Égalité !" : iWon ? "Victoire !" : "Défaite..."}
+            {isTie ? "Égalité !" : iWon ? "Victoire !" : "Défaite..."}
           </h2>
           <p className="text-muted-foreground mb-6 md:mb-8 text-sm md:text-base">
-            {tie
+            {isTie
               ? "Match nul, vous êtes aussi forts !"
               : iWon
               ? "Félicitations, tu as gagné !"
               : "Pas de chance, tu feras mieux la prochaine fois !"}
           </p>
 
-          <div className="bg-card/80 backdrop-blur-sm rounded-2xl md:rounded-3xl p-6 md:p-8 card-shadow border border-border mb-6 md:mb-8">
-            <div className="flex justify-between items-center">
-              <div className="text-left">
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  {room.host_name} {hostWins && "🏆"}
-                </p>
-                <p className="text-3xl md:text-4xl font-black text-player-one">
-                  {room.host_score}<span className="text-sm md:text-lg text-muted-foreground">/{maxScorePerPlayer}</span>
-                </p>
-              </div>
-              <div className="text-xl md:text-2xl font-bold text-muted-foreground">-</div>
-              <div className="text-right">
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  {room.guest_name} {guestWins && "🏆"}
-                </p>
-                <p className="text-3xl md:text-4xl font-black text-player-two">
-                  {room.guest_score}<span className="text-sm md:text-lg text-muted-foreground">/{maxScorePerPlayer}</span>
-                </p>
-              </div>
+          <div className={cn(
+            "bg-card/80 backdrop-blur-sm rounded-2xl md:rounded-3xl p-6 md:p-8 card-shadow border border-border mb-6 md:mb-8",
+            numPlayers === 2 && "max-w-md mx-auto",
+            numPlayers === 3 && "max-w-2xl mx-auto",
+            numPlayers === 4 && "max-w-4xl mx-auto"
+          )}>
+            <div className={cn(
+              "grid gap-4 md:gap-6",
+              numPlayers === 2 && "grid-cols-2",
+              numPlayers === 3 && "grid-cols-3",
+              numPlayers === 4 && "grid-cols-2 md:grid-cols-4"
+            )}>
+              {scores.map((player, index) => {
+                const isWinner = winners.some(w => w.role === player.role);
+                const playerColors = [
+                  { text: "text-player-one", bg: "bg-player-one/10" },
+                  { text: "text-player-two", bg: "bg-player-two/10" },
+                  { text: "text-green-500", bg: "bg-green-500/10" },
+                  { text: "text-purple-500", bg: "bg-purple-500/10" },
+                ];
+                const color = playerColors[index] || playerColors[0];
+                
+                return (
+                  <div key={player.role} className={cn("text-center", color.bg, "p-4 rounded-xl")}>
+                    <p className="text-xs md:text-sm text-muted-foreground mb-1">
+                      {player.name} {isWinner && "🏆"}
+                    </p>
+                    <p className={cn("text-3xl md:text-4xl font-black", color.text)}>
+                      {player.score}<span className="text-sm md:text-lg text-muted-foreground">/{maxScorePerPlayer}</span>
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -308,27 +330,38 @@ export function MultiplayerGame({
         </Button>
       </div>
 
-      {/* Player Cards */}
-      <div className="grid grid-cols-2 gap-2 md:gap-3 mb-2 flex-shrink-0">
-        <PlayerCard
-          playerNumber={1}
-          name={room.host_name}
-          score={room.host_score}
-          isActive={room.current_turn === "host" && phase === "playing"}
-          isWinner={false}
-          jokersLeft={playerRole === "host" ? jokersLeft : undefined}
-          isOnFire={playerOnFire === "host"}
-        />
-        <PlayerCard
-          playerNumber={2}
-          name={room.guest_name || "Guest"}
-          score={room.guest_score}
-          isActive={room.current_turn === "guest" && phase === "playing"}
-          isWinner={false}
-          jokersLeft={playerRole === "guest" ? jokersLeft : undefined}
-          isOnFire={playerOnFire === "guest"}
-        />
-      </div>
+      {/* Player Cards - Support up to 4 players */}
+      {(() => {
+        const numPlayers = 1 + (room.guest_name ? 1 : 0) + (room.player3_name ? 1 : 0) + (room.player4_name ? 1 : 0);
+        const players = [
+          { role: "host" as const, name: room.host_name, score: room.host_score, number: 1 },
+          ...(room.guest_name ? [{ role: "guest" as const, name: room.guest_name, score: room.guest_score, number: 2 }] : []),
+          ...(room.player3_name ? [{ role: "player3" as const, name: room.player3_name, score: room.player3_score || 0, number: 3 }] : []),
+          ...(room.player4_name ? [{ role: "player4" as const, name: room.player4_name, score: room.player4_score || 0, number: 4 }] : []),
+        ];
+
+        return (
+          <div className={cn(
+            "grid gap-2 md:gap-3 mb-2 flex-shrink-0",
+            numPlayers === 2 && "grid-cols-2",
+            numPlayers === 3 && "grid-cols-3",
+            numPlayers === 4 && "grid-cols-2 md:grid-cols-4"
+          )}>
+            {players.map((player) => (
+              <PlayerCard
+                key={player.role}
+                playerNumber={player.number as 1 | 2 | 3 | 4}
+                name={player.name}
+                score={player.score}
+                isActive={room.current_turn === player.role && phase === "playing"}
+                isWinner={false}
+                jokersLeft={playerRole === player.role ? jokersLeft : undefined}
+                isOnFire={playerOnFire === player.role}
+              />
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Timer */}
       {phase === "playing" && isMyTurn && (
