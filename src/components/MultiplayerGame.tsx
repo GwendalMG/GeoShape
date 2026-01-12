@@ -419,7 +419,13 @@ export function MultiplayerGame({
         {phase === "playing" && !isMyTurn && (
           <div className="text-center py-6 md:py-8">
             <p className="text-lg md:text-xl text-muted-foreground animate-pulse">
-              C'est au tour de {room.current_turn === "host" ? room.host_name : room.guest_name}...
+              C'est au tour de {
+                room.current_turn === "host" ? room.host_name :
+                room.current_turn === "guest" ? room.guest_name :
+                room.current_turn === "player3" ? room.player3_name :
+                room.current_turn === "player4" ? room.player4_name :
+                "..."
+              }...
             </p>
           </div>
         )}
@@ -430,7 +436,12 @@ export function MultiplayerGame({
             <AnswerInput
               onSubmit={handleAnswer}
               disabled={phase === "revealed" || !isMyTurn}
-              playerNumber={playerRole === "host" ? 1 : 2}
+              playerNumber={
+                playerRole === "host" ? 1 :
+                playerRole === "guest" ? 2 :
+                playerRole === "player3" ? 3 :
+                4
+              }
               feedback={feedback === "incorrect" ? "wrong" : feedback}
               isHardCountry={currentCountry?.difficulty === 'DIFFICILE'}
             />
