@@ -250,7 +250,14 @@ export function MultiplayerLobby({
           </div>
 
           {error && (
-            <p className="text-destructive text-center mb-4">{error}</p>
+            <div className="mb-4">
+              <p className="text-destructive text-center mb-2">{error}</p>
+              {error.includes("max_players") && (
+                <p className="text-sm text-muted-foreground text-center">
+                  💡 Astuce : Exécutez le fichier MIGRATION_MAX_PLAYERS.sql dans Supabase pour activer la sélection du nombre de joueurs.
+                </p>
+              )}
+            </div>
           )}
 
           <Button

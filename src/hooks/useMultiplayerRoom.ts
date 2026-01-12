@@ -119,19 +119,40 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
         Array.from({ length: countries.length }, (_, i) => i)
       ).slice(0, totalRounds);
 
-      const { data, error: insertError } = await supabase
+      // Try to insert with max_players first
+      let insertData: any = {
+        room_code: roomCode,
+        host_name: hostName,
+        total_rounds: totalRounds,
+        country_indices: countryIndices,
+      };
+
+      // Try to include max_players, but if the column doesn't exist, it will fail gracefully
+      let { data, error: insertError } = await supabase
         .from("game_rooms")
         .insert({
-          room_code: roomCode,
-          host_name: hostName,
-          total_rounds: totalRounds,
-          country_indices: countryIndices,
+          ...insertData,
           max_players: validMaxPlayers,
         })
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      // If insertion failed and it's likely because max_players column doesn't exist, try without it
+      if (insertError && (insertError.message?.includes('max_players') || insertError.code === '42703')) {
+        console.warn("max_players column not found, creating room without it. Please run MIGRATION_MAX_PLAYERS.sql");
+        const retryResult = await supabase
+          .from("game_rooms")
+          .insert(insertData)
+          .select()
+          .single();
+        data = retryResult.data;
+        insertError = retryResult.error;
+      }
+
+      if (insertError) {
+        console.error("Supabase insert error:", insertError);
+        throw new Error(`Erreur lors de la création de la room: ${insertError.message || 'Vérifiez que la base de données est correctement configurée'}`);
+      }
 
       setRoom(data as GameRoom);
       setPlayerRole("host");
