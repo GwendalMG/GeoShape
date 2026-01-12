@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { countries, checkAnswer } from "@/data/countries";
+import { countries, checkAnswer, getRandomCountries } from "@/data/countries";
 
 export interface GameRoom {
   id: string;
@@ -33,6 +33,7 @@ interface UseMultiplayerRoomReturn {
   submitAnswer: (answer: string) => Promise<{ correct: boolean; countryName: string }>;
   handleTimeUp: () => Promise<void>;
   nextRound: () => Promise<void>;
+  restartGame: () => Promise<void>;
   leaveRoom: () => void;
 }
 
@@ -430,6 +431,53 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     }
   }, [room]);
 
+  const restartGame = useCallback(async () => {
+    if (!room) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Generate new random countries using the same logic as createRoom
+      // Use getRandomCountries to get proper difficulty distribution
+      const randomCountries = getRandomCountries(room.total_rounds);
+      const countryIndices = randomCountries.map(c => {
+        const index = countries.findIndex(country => country.id === c.id);
+        return index >= 0 ? index : 0; // Fallback to 0 if not found
+      }).filter(index => index >= 0); // Filter out invalid indices
+
+      // Reset game state but keep players and room
+      const updatePayload: any = {
+        current_round: 0,
+        current_country_index: null,
+        host_score: 0,
+        guest_score: 0,
+        status: "waiting",
+        current_turn: null,
+        country_indices: countryIndices,
+        round_answered: false,
+        round_start_turn: null,
+      };
+
+      const { data, error: updateError } = await supabase
+        .from("game_rooms")
+        .update(updatePayload)
+        .eq("id", room.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      if (data) {
+        setRoom(data as GameRoom);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to restart game");
+    } finally {
+      setLoading(false);
+    }
+  }, [room]);
+
   const leaveRoom = useCallback(() => {
     setRoom(null);
     setPlayerRole(null);
@@ -448,6 +496,7 @@ export function useMultiplayerRoom(): UseMultiplayerRoomReturn {
     submitAnswer,
     handleTimeUp,
     nextRound,
+    restartGame,
     leaveRoom,
   };
 }

@@ -16,6 +16,7 @@ interface MultiplayerGameProps {
   onTimeUp: () => Promise<void>;
   onNextRound: () => Promise<void>;
   onStartGame: () => Promise<void>;
+  onRestart: () => Promise<void>;
   onLeave: () => void;
   loading?: boolean;
   error?: string | null;
@@ -37,6 +38,7 @@ export function MultiplayerGame({
   onTimeUp,
   onNextRound,
   onStartGame,
+  onRestart,
   onLeave,
   loading = false,
   error = null,
@@ -270,13 +272,23 @@ export function MultiplayerGame({
             </div>
           </div>
 
-          <Button
-            onClick={onLeave}
-            className="py-4 md:py-6 px-8 md:px-12 text-lg md:text-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl glow-gold"
-          >
-            <RotateCcw className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-            Nouvelle partie
-          </Button>
+          <div className="flex gap-4 justify-center">
+            <Button
+              onClick={onRestart}
+              disabled={loading}
+              className="py-4 md:py-6 px-8 md:px-12 text-lg md:text-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl glow-gold disabled:opacity-50"
+            >
+              <RotateCcw className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              Rejouer
+            </Button>
+            <Button
+              onClick={onLeave}
+              variant="outline"
+              className="py-4 md:py-6 px-8 md:px-12 text-lg md:text-xl font-bold border-2 hover:bg-muted"
+            >
+              Quitter
+            </Button>
+          </div>
         </div>
       </div>
     );

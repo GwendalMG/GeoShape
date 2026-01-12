@@ -224,9 +224,10 @@ export function getRandomCountries(count: number): Country[] {
   const limits = getDifficultyLimits(count);
   const numDifficile = Math.floor(Math.random() * (limits.max - limits.min + 1)) + limits.min;
   
-  // Calculate distribution: 70% FACILE, 10% TRES_FACILE, 20% DIFFICILE (with limits)
+  // Calculate distribution: 75% FACILE, 5% TRES_FACILE, 20% DIFFICILE (with limits)
+  // TRES_FACILE reduced from 10% to 5% to make them appear less frequently
   const targetDifficile = Math.min(numDifficile, Math.floor(count * 0.2), difficile.length);
-  const targetTresFacile = Math.min(Math.floor(count * 0.1), tresFacile.length);
+  const targetTresFacile = Math.min(Math.floor(count * 0.05), tresFacile.length); // Reduced from 0.1 to 0.05 (5%)
   const targetFacile = Math.max(0, count - targetDifficile - targetTresFacile);
   
   // Shuffle each category multiple times for better randomization
